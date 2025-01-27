@@ -138,21 +138,21 @@ class ConfigurationsTest {
         Assertions.assertTrue(Files.exists(BASE.resolve(YML.path())));
     }
 
-    void example() {
-        Key<MyClass> mainConfig = Key.builder(Path.of("config.json"), MyClass::new).build();
-        Configurations<MyClass> conf = Configurations.builder(
-                                                             mainConfig,
-                                                             new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(Path.of("configurations"))
-                                                     .configureBuilder()
-                                                     .configureMapper()
-                                                     .configureReaderBuilder()
-                                                     .configureReaderMapper()
-                                                     .configureWriterBuilder()
-                                                     .configureWriterMapper()
-                                                     .build();
-    }
+//    void example() {
+//        Key<MyClass> mainConfig = Key.builder(Path.of("config.json"), MyClass::new).build();
+//        Configurations<MyClass> conf = Configurations.builder(
+//                                                             mainConfig,
+//                                                             new JsonDataFormat())
+//                                                     .addFormat(new YamlDataFormat())
+//                                                     .setBase(Path.of("configurations"))
+//                                                     .configureBuilder()
+//                                                     .configureMapper()
+//                                                     .configureReaderBuilder()
+//                                                     .configureReaderMapper()
+//                                                     .configureWriterBuilder()
+//                                                     .configureWriterMapper()
+//                                                     .build();
+//    }
 
     void exampleJacksonBukkit(){
         Key<MyClass> mainConfig = Key.builder(Path.of("config.yml"), MyClass::new).build();
