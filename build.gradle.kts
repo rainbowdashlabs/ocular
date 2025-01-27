@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.spotless)
     alias(libs.plugins.indra.core)
     alias(libs.plugins.indra.publishing)
-    alias(libs.plugins.indra.sonatype)
 }
 
 publishData {
@@ -61,6 +60,9 @@ java{
 }
 
 indra {
+
+    publishReleasesTo("central", "https://central.sonatype.com")
+
     javaVersions {
         target(17)
         testWith(17)
@@ -86,10 +88,6 @@ indra {
             }
         }
     }
-}
-
-indraSonatype {
-    useAlternateSonatypeOSSHost("s01")
 }
 
 tasks {
