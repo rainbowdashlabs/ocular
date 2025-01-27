@@ -3,8 +3,9 @@
  *
  *     Copyright (C) RainbowDashLabs and Contributor
  */
-package dev.chojo.ocular;
+package dev.chojo.ocular.components;
 
+import dev.chojo.ocular.Configurations;
 import dev.chojo.ocular.key.Key;
 
 import java.io.Closeable;

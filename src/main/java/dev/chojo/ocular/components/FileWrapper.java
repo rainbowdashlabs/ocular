@@ -3,7 +3,7 @@
  *
  *     Copyright (C) RainbowDashLabs and Contributor
  */
-package dev.chojo.ocular;
+package dev.chojo.ocular.components;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -15,7 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  *
  * @param <T> the type of the file object being wrapped
  */
-record FileWrapper<T>(Format<?, ?> format, T file) {
+public record FileWrapper<T>(Format<?, ?> format, T file) {
     /**
      * Serializes the encapsulated file object into its JSON string representation
      * using the configured writer of the associated format.
@@ -23,7 +23,7 @@ record FileWrapper<T>(Format<?, ?> format, T file) {
      * @return the JSON string representation of the file object
      * @throws JsonProcessingException if an error occurs during serialization
      */
-    String asString() throws JsonProcessingException {
+    public String asString() throws JsonProcessingException {
         return format.writer().writeValueAsString(file);
     }
 }

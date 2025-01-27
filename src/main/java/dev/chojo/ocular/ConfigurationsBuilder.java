@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.dataformats.DataFormat;
+import dev.chojo.ocular.impl.ModifyableConfigurations;
 import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.util.Consumers;
 import org.jetbrains.annotations.NotNull;

@@ -3,16 +3,18 @@
  *
  *     Copyright (C) RainbowDashLabs and Contributor
  */
-package dev.chojo.ocular;
+package dev.chojo.ocular.impl;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import dev.chojo.ocular.Configurations;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,6 +44,16 @@ public class ModifyableConfigurations<T> extends Configurations<T> {
         this.configureBuilder = configureBuilder;
         this.configureMapper = configureMapper;
         this.modules = modules;
+    }
+
+    @Override
+    public List<Module> additionalModules() {
+        if (parent != null) {
+            LinkedList<Module> combinedModules = new LinkedList<>(parent.additionalModules());
+            combinedModules.addAll(modules);
+            return combinedModules;
+        }
+        return modules;
     }
 
     @Override

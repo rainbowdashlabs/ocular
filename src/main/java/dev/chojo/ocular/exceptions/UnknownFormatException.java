@@ -5,7 +5,7 @@
  */
 package dev.chojo.ocular.exceptions;
 
-import dev.chojo.ocular.Format;
+import dev.chojo.ocular.components.Format;
 import dev.chojo.ocular.key.Key;
 
 import java.util.Collection;

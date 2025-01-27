@@ -14,6 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import dev.chojo.ocular.components.FileWrapper;
+import dev.chojo.ocular.components.Format;
+import dev.chojo.ocular.components.Wrapper;
 import dev.chojo.ocular.dataformats.Configurator;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.exceptions.ConfigurationException;
@@ -30,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +57,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     private static final Logger log = getLogger(Configurations.class);
     private final Path base;
     private final Key<T> main;
-    private final Configurations<?> parent;
+    protected final Configurations<?> parent;
     private final List<Format<?, ?>> formats = new LinkedList<>();
     private final ClassLoader classLoader;
     private final Map<Key<?>, FileWrapper<?>> files = new HashMap<>();
@@ -313,7 +317,10 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      *
      * @return list of modules.
      */
-    protected List<Module> additionalModules() {
+    public List<Module> additionalModules() {
+        if(parent != null) {
+            return parent.additionalModules();
+        }
         return Collections.emptyList();
     }
 
@@ -360,7 +367,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         return key.path().isAbsolute() ? key.path() : base.resolve(key.path());
     }
 
-    protected Format<?, ?> determineFormat(Key<?> key) {
+    private Format<?, ?> determineFormat(Key<?> key) {
         for (var format : formats) {
             if (format.format().matches(key)) {
                 return format;

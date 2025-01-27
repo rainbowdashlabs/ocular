@@ -3,10 +3,11 @@
  *
  *     Copyright (C) RainbowDashLabs and Contributor
  */
-package dev.chojo.ocular;
+package dev.chojo.ocular.components;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import dev.chojo.ocular.Configurations;
 import dev.chojo.ocular.dataformats.DataFormat;
 
 /**
