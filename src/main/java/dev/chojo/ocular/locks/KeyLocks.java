@@ -1,6 +1,11 @@
+/*
+ *     SPDX-License-Identifier: LGPL-3.0-or-later
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package dev.chojo.ocular.locks;
 
-import dev.chojo.ocular.Key;
+import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.exceptions.ParallelAccessException;
 
 import java.util.HashSet;

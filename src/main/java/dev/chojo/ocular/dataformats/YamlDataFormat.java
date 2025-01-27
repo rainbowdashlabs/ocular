@@ -1,7 +1,13 @@
+/*
+ *     SPDX-License-Identifier: LGPL-3.0-or-later
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package dev.chojo.ocular.dataformats;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
 
 public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder> {
 
@@ -23,5 +29,14 @@ public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder
     @Override
     public String[] typeAlias() {
         return new String[]{"yml"};
+    }
+
+    @Override
+    public void assertInstalled() throws MissingDataTypeInstallationException {
+        try {
+            Class.forName(YAMLMapper.class.getName());
+        } catch (ClassNotFoundException e) {
+            throw new MissingDataTypeInstallationException(type(), "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml");
+        }
     }
 }

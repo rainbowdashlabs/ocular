@@ -1,15 +1,25 @@
+/*
+ *     SPDX-License-Identifier: LGPL-3.0-or-later
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package dev.chojo.classes;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-public final class SerializableRecord {
+public final class MyClass {
     private String name;
-    private Integer age;
+    private int age;
 
-    public SerializableRecord() {
+    public MyClass() {
     }
 
-    public SerializableRecord(String name, Integer age) {
+    @JsonCreator
+    public MyClass(@JsonProperty("name") String name,
+                   @JsonProperty("age") int age) {
         this.name = name;
         this.age = age;
     }
@@ -18,7 +28,7 @@ public final class SerializableRecord {
         return name;
     }
 
-    public Integer age() {
+    public int age() {
         return age;
     }
 
@@ -26,7 +36,7 @@ public final class SerializableRecord {
         this.name = name;
     }
 
-    public void age(Integer age) {
+    public void age(int age) {
         this.age = age;
     }
 
@@ -34,7 +44,7 @@ public final class SerializableRecord {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (SerializableRecord) obj;
+        var that = (MyClass) obj;
         return Objects.equals(this.name, that.name) &&
                 Objects.equals(this.age, that.age);
     }

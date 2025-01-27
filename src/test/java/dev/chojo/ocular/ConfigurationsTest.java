@@ -1,9 +1,17 @@
+/*
+ *     SPDX-License-Identifier: LGPL-3.0-or-later
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package dev.chojo.ocular;
 
-import dev.chojo.classes.SerializableRecord;
+import de.eldoria.jacksonbukkit.JacksonPaper;
+import dev.chojo.classes.MyClass;
 import dev.chojo.ocular.dataformats.JsonDataFormat;
+import dev.chojo.ocular.dataformats.TomlDataFormat;
 import dev.chojo.ocular.dataformats.YamlDataFormat;
 import dev.chojo.ocular.exceptions.UnknownFormatException;
+import dev.chojo.ocular.key.Key;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,15 +25,18 @@ import java.util.Comparator;
 
 class ConfigurationsTest {
 
-    public static final Key<SerializableRecord> JSON = Key.of("main", Path.of("main.json"), SerializableRecord.class, () -> new SerializableRecord("Lilly", 20));
-    public static final Key<SerializableRecord> YAML = Key.of("main", Path.of("main.yaml"), SerializableRecord.class, () -> new SerializableRecord("Lilly", 20));
-    public static final Key<SerializableRecord> YML = Key.of("main", Path.of("main.yml"), SerializableRecord.class, () -> new SerializableRecord("Lilly", 20));
-    public static final Key<SerializableRecord> TOML = Key.of("main", Path.of("main.toml"), SerializableRecord.class, () -> new SerializableRecord("Lilly", 20));
+    public static final Key<MyClass> JSON = Key.builder(Path.of("main.json"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> YAML = Key.builder(Path.of("main.yaml"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> YML = Key.builder(Path.of("main.yml"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> TOML = Key.builder(Path.of("main.toml"), () -> new MyClass("Lilly", 20)).build();
     public static final Path BASE = Path.of("configbase");
 
 
     @BeforeEach
     void setUp() throws IOException {
+        YamlDataFormat yamlDataFormat = new YamlDataFormat();
+        JsonDataFormat jsonDataFormat = new JsonDataFormat(true); // Enables pretty printing
+        TomlDataFormat tomlDataFormat = new TomlDataFormat();
         Files.createDirectories(BASE);
     }
 
@@ -34,17 +45,17 @@ class ConfigurationsTest {
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
                 walker.map(Path::toFile)
-                        .sorted(Comparator.reverseOrder())
-                        .forEachOrdered(File::delete);
+                      .sorted(Comparator.reverseOrder())
+                      .forEachOrdered(File::delete);
             }
         }
     }
 
     @Test
     void checkMainFileCreation() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
         conf.main();
         conf.save();
         Assertions.assertTrue(Files.exists(BASE.resolve(JSON.path())));
@@ -52,10 +63,10 @@ class ConfigurationsTest {
 
     @Test
     void checkSecondaryFileCreation() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .addFormat(new YamlDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
         conf.secondary(YAML);
         conf.save();
         Assertions.assertTrue(Files.exists(BASE.resolve(YAML.path())));
@@ -63,11 +74,11 @@ class ConfigurationsTest {
 
     @Test
     void checkReload() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .addFormat(new YamlDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
-        SerializableRecord secondary = conf.secondary(YAML);
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
+        MyClass secondary = conf.secondary(YAML);
         secondary.age(19);
         conf.save();
         conf.reload();
@@ -76,20 +87,20 @@ class ConfigurationsTest {
 
     @Test
     void loadUnsupportedFormat() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .addFormat(new YamlDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
 
         Assertions.assertThrows(UnknownFormatException.class, () -> conf.secondary(TOML));
     }
 
     @Test
     void exists() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .addFormat(new YamlDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
         Assertions.assertFalse(conf.exists(JSON));
         conf.main();
         Assertions.assertTrue(conf.exists(JSON));
@@ -97,10 +108,10 @@ class ConfigurationsTest {
 
     @Test
     void loaded() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .addFormat(new YamlDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
         conf.main();
         conf = Configurations.builder(JSON, new JsonDataFormat())
                              .addFormat(new YamlDataFormat())
@@ -114,16 +125,40 @@ class ConfigurationsTest {
 
     @Test
     void migrate() {
-        Configurations<SerializableRecord> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                                .addFormat(new YamlDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
-        SerializableRecord yaml = conf.secondary(YAML);
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
+        MyClass yaml = conf.secondary(YAML);
         yaml.age(19);
         conf.migrate(YAML, YML);
         conf.reload();
-        SerializableRecord yml = conf.secondary(YML);
+        MyClass yml = conf.secondary(YML);
         Assertions.assertEquals(19, yml.age());
         Assertions.assertTrue(Files.exists(BASE.resolve(YML.path())));
+    }
+
+    void example() {
+        Key<MyClass> mainConfig = Key.builder(Path.of("config.json"), MyClass::new).build();
+        Configurations<MyClass> conf = Configurations.builder(
+                                                             mainConfig,
+                                                             new JsonDataFormat())
+                                                     .addFormat(new YamlDataFormat())
+                                                     .setBase(Path.of("configurations"))
+                                                     .configureBuilder()
+                                                     .configureMapper()
+                                                     .configureReaderBuilder()
+                                                     .configureReaderMapper()
+                                                     .configureWriterBuilder()
+                                                     .configureWriterMapper()
+                                                     .build();
+    }
+
+    void exampleJacksonBukkit(){
+        Key<MyClass> mainConfig = Key.builder(Path.of("config.yml"), MyClass::new).build();
+        Configurations.builder(mainConfig, new YamlDataFormat())
+                .withClassLoader(this.getClass().getClassLoader()) // For minecraft its important to pass the classloader
+                .addModule(new JacksonPaper())
+                .build();
     }
 }

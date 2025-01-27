@@ -1,10 +1,11 @@
 /*
  *     SPDX-License-Identifier: LGPL-3.0-or-later
  *
- *     Copyright (C) EldoriaRPG Team and Contributor
+ *     Copyright (C) RainbowDashLabs and Contributor
  */
-
 package dev.chojo.ocular;
+
+import dev.chojo.ocular.key.Key;
 
 import java.io.Closeable;
 
@@ -26,6 +27,14 @@ public class Wrapper<T> implements Closeable {
         this.config = config;
     }
 
+    /**
+     * Creates a new instance of a {@code Wrapper} for the provided key and configuration.
+     *
+     * @param <V>    the type of the configuration
+     * @param key    the key associated with the configuration
+     * @param config the configuration to be wrapped
+     * @return a new {@code Wrapper} instance for the given key and configuration
+     */
     public static <V> Wrapper<V> of(Key<V> key, Configurations<?> config) {
         return new Wrapper<>(key, config);
     }

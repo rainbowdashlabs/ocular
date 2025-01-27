@@ -1,0 +1,16 @@
+name: docs
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - run: echo "ocular.docs.chojo.dev" > ./docs/CNAME
+      - run: pip install pipenv && pipenv install && pipenv run mkdocs gh-deploy --force

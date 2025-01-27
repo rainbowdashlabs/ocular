@@ -1,3 +1,8 @@
+/*
+ *     SPDX-License-Identifier: LGPL-3.0-or-later
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package dev.chojo.ocular;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -14,6 +19,7 @@ import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.exceptions.ConfigurationException;
 import dev.chojo.ocular.exceptions.UnknownFormatException;
 import dev.chojo.ocular.hooks.ConfigSubscriber;
+import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.locks.KeyLock;
 import dev.chojo.ocular.locks.KeyLocks;
 import org.jetbrains.annotations.NotNull;
@@ -33,26 +39,47 @@ import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * The Configurations class provides a structure for managing configuration files.
+ * It allows for creating, loading, saving, reloading, and migrating configuration files.
+ * The class supports every defined data format that is passed on creation.
+ * <p>
+ * It also provides a primary configuration for convenience.
+ *
+ * @param <T> The type of the primary configuration.
+ */
 public class Configurations<T> implements Configurator<ObjectMapper, MapperBuilder<ObjectMapper, ?>> {
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm");
     private static final Logger log = getLogger(Configurations.class);
     private final Path base;
     private final Key<T> main;
+    private final Configurations<?> parent;
     private final List<Format<?, ?>> formats = new LinkedList<>();
     private final ClassLoader classLoader;
     private final Map<Key<?>, FileWrapper<?>> files = new HashMap<>();
     private final KeyLocks locks = new KeyLocks();
 
-    public Configurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats, ClassLoader classLoader) {
+    public Configurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats, ClassLoader classLoader, Configurations<?> parent) {
         this.base = base;
         this.main = main;
+        this.parent = parent;
         for (DataFormat<?, ?> format : formats) {
+            format.assertInstalled();
             this.formats.add(new Format<>(format, this));
         }
         this.classLoader = classLoader;
     }
 
-    public static <V> ConfigurationsBuilder<V> builder(Key<V> main, DataFormat<?,?> format){
+    /**
+     * Creates a new {@link ConfigurationsBuilder} for constructing {@link Configurations} instances.
+     * This builder facilitates setting up configurations with a primary key and associated format.
+     *
+     * @param <V> the type of the primary configuration's associated data
+     * @param main the primary configuration key representing the main configuration file
+     * @param format the data format used for managing the file associated with the main key
+     * @return a new instance of {@link ConfigurationsBuilder} prepared with the specified primary key and format
+     */
+    public static <V> ConfigurationsBuilder<V> builder(Key<V> main, DataFormat<?, ?> format) {
         return new ConfigurationsBuilder<>(main, format);
     }
 
@@ -207,6 +234,16 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         files.put(key, new FileWrapper<>(determineFormat(key), newValue));
     }
 
+
+    /**
+     * Migrates the configuration data from one key to another key.
+     * This method loads the configuration associated with the source key, attaches it to the target key,
+     * determines the appropriate data format for the target key, and then saves the data under the new key.
+     *
+     * @param <V>    the type of the configuration data being migrated
+     * @param key    the source configuration key containing the data to be migrated
+     * @param newKey the target configuration key to which the data should be migrated
+     */
     public <V> void migrate(Key<V> key, Key<V> newKey) {
         V loaded = secondary(key);
         files.put(newKey, new FileWrapper<>(determineFormat(newKey), loaded));
@@ -323,11 +360,14 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         return key.path().isAbsolute() ? key.path() : base.resolve(key.path());
     }
 
-    private Format<?, ?> determineFormat(Key<?> key) {
+    protected Format<?, ?> determineFormat(Key<?> key) {
         for (var format : formats) {
             if (format.format().matches(key)) {
                 return format;
             }
+        }
+        if (parent != null) {
+            parent.determineFormat(key);
         }
         throw new UnknownFormatException(key, formats);
     }

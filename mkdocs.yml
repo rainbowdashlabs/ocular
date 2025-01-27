@@ -1,0 +1,66 @@
+site_name: Ocular
+site_url: https://ocular.docs.chojo.dev
+site_description: Manage configuration files with Jackson
+repo_url: https://github.com/RainbowDashLabs/ocular
+repo_name: Ocular
+plugins:
+  - git-revision-date-localized:
+      type: date
+      fallback_to_build_date: true
+      enable_creation_date: true
+nav:
+  - Home: index.md
+  - 'Create a Configuration': configuration_creation.md
+  - 'Customise a Configuration': customise.md
+  - 'Examples':
+      - 'Jackson Bukkit': examples/jackson_bukkit.md
+theme:
+  features:
+    - navigation.instant
+    - navigation.tracking
+    #    - navigation.expand
+    #    - navigation.tabs
+    #    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.annotate
+  language: en
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: pink
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: pink
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      name: Github
+      link: https://github.com/RainbowDashLabs
