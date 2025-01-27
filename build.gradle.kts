@@ -3,7 +3,6 @@ import com.vanniktech.maven.publish.SonatypeHost
 plugins {
     java
     `java-library`
-    `maven-publish`
     id("de.chojo.publishdata") version "1.4.0"
     alias(libs.plugins.spotless)
     id("com.vanniktech.maven.publish") version "0.30.0"
@@ -92,6 +91,8 @@ mavenPublishing{
             developerConnection.set("scm:git:ssh://github.com/racinbowdashlabs/ocular.git")
         }
     }
+
+    configureBasedOnAppliedPlugins(sourcesJar = true, javadocJar = true)
 }
 
 //
