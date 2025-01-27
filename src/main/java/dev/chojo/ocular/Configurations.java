@@ -40,8 +40,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     private final Key<T> main;
     private final List<Format<?, ?>> formats = new LinkedList<>();
     private final ClassLoader classLoader;
-    private final Map<Key<?>, Object> files = new HashMap<>();
-    private final Map<Key<?>, Format<?, ?>> fileFormat = new HashMap<>();
+    private final Map<Key<?>, FileWrapper<?>> files = new HashMap<>();
     private final KeyLocks locks = new KeyLocks();
 
     public Configurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats, ClassLoader classLoader) {
@@ -53,10 +52,8 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         this.classLoader = classLoader;
     }
 
-    private void setupFormats() {
-        for (DataFormat<?, ?> format : formats) {
-
-        }
+    public static <V> ConfigurationsBuilder<V> builder(Key<V> main, DataFormat<?,?> format){
+        return new ConfigurationsBuilder<>(main, format);
     }
 
     /**
@@ -87,7 +84,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         // This will cause a recursive call
 
         if (files.containsKey(key)) {
-            return (V) files.get(key);
+            return (V) files.get(key).file();
         }
 
         KeyLock keyLock = locks.tryLock(key);
@@ -97,9 +94,9 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         }
 
         try (keyLock) {
-            V v = createAndLoad(key);
+            FileWrapper<V> v = createAndLoad(key);
             files.put(key, v);
-            return v;
+            return v.file();
         }
     }
 
@@ -114,7 +111,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @param <V> type of file
      * @return instance of file
      */
-    protected final <V> V load(Key<V> key) {
+    protected final <V> FileWrapper<V> load(Key<V> key) {
         if (!exists(key)) return null;
         try {
             return read(determineFormat(key), resolvePath(key), key.configClazz());
@@ -122,9 +119,9 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             log.error("Could not load configuration file.", e);
             backup(key);
             log.warn("Recreating default config");
-            write(determineFormat(key), resolvePath(key), key.initValue().get());
+            write(resolvePath(key), new FileWrapper<>(determineFormat(key), key.initValue().get()));
         }
-        return key.initValue().get();
+        return new FileWrapper<>(determineFormat(key), key.initValue().get());
     }
 
     /**
@@ -136,11 +133,11 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @param <V> type of file
      * @return instance of file
      */
-    protected final <V> V createAndLoad(Key<V> key) {
-        var path = resolvePath(key);
+    protected final <V> FileWrapper<V> createAndLoad(Key<V> key) {
         if (!exists(key)) {
+            var path = resolvePath(key);
             log.info("Configuration file: {} does not exist. Creating.", path);
-            write(determineFormat(key), path, key.initValue().get());
+            write(path, new FileWrapper<>(determineFormat(key), key.initValue().get()));
         }
         return load(key);
     }
@@ -207,7 +204,13 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @param <V>      type of key
      */
     public <V> void replace(Key<V> key, V newValue) {
-        files.put(key, newValue);
+        files.put(key, new FileWrapper<>(determineFormat(key), newValue));
+    }
+
+    public <V> void migrate(Key<V> key, Key<V> newKey) {
+        V loaded = secondary(key);
+        files.put(newKey, new FileWrapper<>(determineFormat(newKey), loaded));
+        save(newKey);
     }
 
     /**
@@ -225,7 +228,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @param key configuration key
      */
     public void save(Key<?> key) {
-        write(fileFormat.get(key), resolvePath(key), files.get(key));
+        write(resolvePath(key), files.get(key));
     }
 
     /**
@@ -289,27 +292,27 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         }
     }
 
-    private void write(Format<?, ?> format, Path path, Object object) {
+    private void write(Path path, FileWrapper<?> wrapper) {
         try {
-            if (object instanceof ConfigSubscriber sub) {
+            if (wrapper.file() instanceof ConfigSubscriber sub) {
                 sub.preWrite(this);
             }
             Files.createDirectories(path.getParent());
             // We do this to avoid wiping a file on serialization error.
-            Files.writeString(path, format.writer().writeValueAsString(object));
+            Files.writeString(path, wrapper.asString());
         } catch (IOException e) {
             log.error("Could not write configuration file to {}", path, e);
             throw new ConfigurationException("Could not write configuration file to " + path, e);
         }
     }
 
-    private <V> V read(Format<?, ?> format, Path path, Class<V> clazz) {
+    private <V> FileWrapper<V> read(Format<?, ?> format, Path path, Class<V> clazz) {
         try {
             V v = format.reader().readValue(path.toFile(), clazz);
             if (v instanceof ConfigSubscriber sub) {
                 sub.postRead(this);
             }
-            return v;
+            return new FileWrapper<>(format, v);
         } catch (IOException e) {
             log.error("Could not read configuration file from {}", path, e);
             throw new ConfigurationException("Could not read configuration file from " + path, e);

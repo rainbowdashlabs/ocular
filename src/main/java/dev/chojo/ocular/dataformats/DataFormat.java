@@ -14,9 +14,9 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
     String type();
 
     default boolean matches(Key<?> key) {
-        if (key.path().endsWith(type())) return true;
+        if (key.path().toString().endsWith(type())) return true;
         for (String s : typeAlias()) {
-            if (key.path().endsWith(s)) return true;
+            if (key.path().toString().endsWith(s)) return true;
         }
         return false;
     }

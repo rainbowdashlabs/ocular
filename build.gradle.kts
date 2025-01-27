@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.chojo"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -24,8 +24,15 @@ dependencies {
     compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.jetbrains", "annotations", "24.1.0")
+    testImplementation("org.slf4j", "slf4j-api", "2.0.16")
+    testImplementation("org.slf4j", "slf4j-simple", "2.0.16")
+    testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
+    testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 }

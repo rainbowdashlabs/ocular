@@ -16,4 +16,38 @@ import java.util.function.Supplier;
  * @param <T>         type of file class
  */
 public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> initValue) {
+        /**
+     * Create a key for the default config aka config.yml.
+     *
+     * @param name        name of file
+     * @param path        path of file with file ending. Path might be relative to {@link Configurations#base()}
+     * @param configClazz class representing the config.yml
+     * @param initValue   the initial value when the config does not yet exist.
+     * @param <V>         type of config class
+     * @return config key for config.yml
+     */
+    public static <V> Key<V> of(String name, Path path, Class<V> configClazz, Supplier<V> initValue) {
+        return new Key<V>(name, path, configClazz, initValue);
+    }
+
+        @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Key<?> configKey = (Key<?>) o;
+
+        return path.equals(configKey.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return path.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "%s (%s | %s)".formatted(name, path.toString(), configClazz.getSimpleName());
+    }
+
 }
