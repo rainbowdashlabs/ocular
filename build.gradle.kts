@@ -1,11 +1,12 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     java
     `java-library`
     `maven-publish`
     id("de.chojo.publishdata") version "1.4.0"
     alias(libs.plugins.spotless)
-    alias(libs.plugins.indra.core)
-    alias(libs.plugins.indra.publishing)
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 publishData {
@@ -51,7 +52,7 @@ spotless {
     }
 }
 
-java{
+java {
     withJavadocJar()
     withSourcesJar()
     toolchain {
@@ -59,36 +60,71 @@ java{
     }
 }
 
-indra {
+mavenPublishing{
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-    publishReleasesTo("central", "https://central.sonatype.com")
+    coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
 
-    javaVersions {
-        target(17)
-        testWith(17)
-    }
-
-    github("rainbowdashlabs", "ocular") {
-        ci(true)
-    }
-
-    lgpl3OrLaterLicense()
-
-    signWithKeyFromPrefixedProperties("rainbowdashlabs")
-
-    configurePublications {
-        pom {
-            developers {
-                developer {
-                    id.set("rainbowdashlabs")
-                    name.set("Lilly Fülling")
-                    email.set("mail@chojo.dev")
-                    url.set("https://github.com/rainbowdashlabs")
-                }
+    pom{
+        name.set("Ocular")
+        description.set(project.description)
+        inceptionYear.set("2025")
+        url.set("https://github.com/rainbowdashlabs/ocular")
+        licenses {
+            license {
+                name.set("LGPL-3.0")
+                url.set("https://opensource.org/license/lgpl-3-0")
             }
+        }
+
+        developers{
+            developer{
+                id.set("rainbowdashlabs")
+                name.set("Lilly Fülling")
+                email.set("mail@chojo.dev")
+                url.set("https://github.com/rainbowdashlabs")
+            }
+        }
+
+        scm{
+            url.set("https://github.com/rainbowdashlabs/ocular")
+            connection.set("scm:git:git://github.com/rainbowdashlabs/ocular.git")
+            developerConnection.set("scm:git:ssh://github.com/racinbowdashlabs/ocular.git")
         }
     }
 }
+
+//
+//indra {
+//
+//    publishReleasesTo("central", "https://central.sonatype.com")
+//
+//    javaVersions {
+//        target(17)
+//        testWith(17)
+//    }
+//
+//    github("rainbowdashlabs", "ocular") {
+//        ci(true)
+//    }
+//
+//    lgpl3OrLaterLicense()
+//
+//    signWithKeyFromPrefixedProperties("rainbowdashlabs")
+//
+//    configurePublications {
+//        pom {
+//            developers {
+//                developer {
+//                    id.set("rainbowdashlabs")
+//                    name.set("Lilly Fülling")
+//                    email.set("mail@chojo.dev")
+//                    url.set("https://github.com/rainbowdashlabs")
+//                }
+//            }
+//        }
+//    }
+//}
 
 tasks {
     test {
