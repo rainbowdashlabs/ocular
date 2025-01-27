@@ -36,7 +36,7 @@ dependencies {
     compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
     compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.jetbrains", "annotations", "24.1.0")
     testImplementation("org.slf4j", "slf4j-api", "2.0.16")
