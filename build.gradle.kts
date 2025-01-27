@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
@@ -10,7 +12,7 @@ plugins {
 
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "2.3.1"
+    publishingVersion = "1.0.0"
 }
 
 group = "dev.chojo"
@@ -59,6 +61,7 @@ java {
 
 mavenPublishing{
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
 
     coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
 
@@ -90,7 +93,10 @@ mavenPublishing{
         }
     }
 
-    configureBasedOnAppliedPlugins(sourcesJar = true, javadocJar = true)
+    configure(JavaLibrary(
+        javadocJar = JavadocJar.Javadoc(),
+        sourcesJar = true
+    ))
 }
 
 //
