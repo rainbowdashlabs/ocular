@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j", "slf4j-api", "2.0.16")
+    compileOnly("org.slf4j", "slf4j-api", "2.0.17")
     compileOnlyApi("org.jetbrains", "annotations", "26.0.2")
     api("com.fasterxml.jackson.core", "jackson-databind") {
         version {
@@ -39,8 +39,8 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.jetbrains", "annotations", "26.0.2")
-    testImplementation("org.slf4j", "slf4j-api", "2.0.16")
-    testImplementation("org.slf4j", "slf4j-simple", "2.0.16")
+    testImplementation("org.slf4j", "slf4j-api", "2.0.17")
+    testImplementation("org.slf4j", "slf4j-simple", "2.0.17")
     testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
     testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
     testImplementation("de.eldoria.jacksonbukkit", "paper", "1.2.0")
