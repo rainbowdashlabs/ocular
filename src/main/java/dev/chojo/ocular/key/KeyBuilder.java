@@ -40,8 +40,9 @@ public class KeyBuilder<T> {
      *
      * @param name the name to be assigned to the key
      */
-    public void name(String name) {
+    public KeyBuilder<T> name(String name) {
         this.name = name;
+        return this;
     }
 
     public Key<T> build() {
