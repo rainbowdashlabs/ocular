@@ -22,6 +22,7 @@ import java.util.List;
  * @param <B> the type of MapperBuilder used to configure the associated ObjectMapper
  */
 public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B>> extends Configurator<M, B> {
+    
     /**
      * Creates and returns a new instance of the mapper builder associated with the data format.
      * This method is used to initialize the builder for configuring the ObjectMapper for
@@ -39,6 +40,13 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
      * @return the primary type identifier for the data format as a non-null string
      */
     String type();
+
+    /**
+     * Used to determine whether the default pretty printer should be used explicitly
+     */
+    default boolean enablePrettyPrint() {
+        return false;
+    }
 
     /**
      * Checks whether the specified key matches the type or any of the type aliases of the current data format.

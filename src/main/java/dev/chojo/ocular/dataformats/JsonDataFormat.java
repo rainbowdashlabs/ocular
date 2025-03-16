@@ -34,6 +34,11 @@ public class JsonDataFormat implements DataFormat<JsonMapper, JsonMapper.Builder
     }
 
     @Override
+    public boolean enablePrettyPrint() {
+        return prettyPrint;
+    }
+
+    @Override
     public void configure(JsonMapper mapper) {
         if (prettyPrint) {
             mapper.writerWithDefaultPrettyPrinter();
