@@ -7,12 +7,12 @@ plugins {
     `java-library`
     id("de.chojo.publishdata") version "1.4.0"
     alias(libs.plugins.spotless)
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.vanniktech.maven.publish") version "0.31.0"
 }
 
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "1.0.1"
+    publishingVersion = "1.0.2"
 }
 
 group = "dev.chojo"
