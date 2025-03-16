@@ -29,12 +29,12 @@ dependencyResolutionManagement {
             plugin("indra-publishing", "net.kyori.indra.publishing").versionRef("indra")
             plugin("indra-sonatype", "net.kyori.indra.publishing.sonatype").versionRef("indra")
 
-            version("slf4j", "2.0.16")
+            version("slf4j", "2.0.17")
             library("slf4j-api", "org.slf4j", "slf4j-api").versionRef("slf4j")
         }
 
         create("testlibs") {
-            version("slf4j", "2.0.16")
+            version("slf4j", "2.0.17")
             library("slf4j-noop", "org.slf4j", "slf4j-nop").versionRef("slf4j")
             library("slf4j-simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
         }
