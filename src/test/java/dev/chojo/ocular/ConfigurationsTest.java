@@ -150,12 +150,28 @@ class ConfigurationsTest {
         Assertions.assertTrue(BASE.resolve(JSON.path()).toFile().exists());
         String json = Files.readString(BASE.resolve(JSON.path()));
 
-        Assertions.assertEquals("""
+        // The reason we use .lines() here is because of OS specific differences in line separators (LF & CRLF) 
+        Assertions.assertLinesMatch("""
             {
-              "name": "Lilly",
-              "age": 20
+              "name" : "Lilly",
+              "age" : 20
             }
-            """.trim(), json);
+            """.trim().lines(), json.lines());
+    }
+
+    @Test
+    void checkNonPrettyJsonFormat() throws IOException {
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat(false))
+            .setBase(BASE)
+            .build();
+
+        conf.main();
+        conf.save();
+
+        Assertions.assertTrue(BASE.resolve(JSON.path()).toFile().exists());
+        String json = Files.readString(BASE.resolve(JSON.path()));
+        
+        Assertions.assertEquals("{\"name\":\"Lilly\",\"age\":20}", json);
     }
 
 //    void example() {
