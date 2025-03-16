@@ -24,6 +24,10 @@ public record FileWrapper<T>(Format<?, ?> format, T file) {
      * @throws JsonProcessingException if an error occurs during serialization
      */
     public String asString() throws JsonProcessingException {
+        if (format.format().enablePrettyPrint()) {
+            return format.writer().writerWithDefaultPrettyPrinter().writeValueAsString(file);
+        }
+
         return format.writer().writeValueAsString(file);
     }
 }
