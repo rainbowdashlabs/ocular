@@ -43,7 +43,7 @@ dependencies {
     testImplementation("org.slf4j", "slf4j-simple", "2.0.17")
     testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
     testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
-    testImplementation("de.eldoria.jacksonbukkit", "paper", "1.2.0")
+    testImplementation("de.eldoria.jacksonbukkit", "paper", "1.4.0")
 }
 
 spotless {
