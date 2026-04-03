@@ -5,7 +5,6 @@ plugins {
     java
     `java-library`
     id("de.chojo.publishdata") version "1.4.0"
-    id("org.openrewrite.rewrite") version "latest.release"
     alias(libs.plugins.spotless)
     id("com.vanniktech.maven.publish") version "0.36.0"
 }
@@ -22,10 +21,6 @@ version = publishData.getVersion()
 description =
     "Wrapper library around jackson to manage configuration files. Supporting different formats and allows high customization with reasonable defaults to start right away."
 
-rewrite {
-    activeRecipe("org.openrewrite.java.jackson.UpgradeJackson_2_3")
-    setExportDatatables(true)
-}
 repositories {
     mavenCentral()
 }
@@ -85,7 +80,7 @@ mavenPublishing{
         developers{
             developer{
                 id.set("rainbowdashlabs")
-                name.set("Lilly Fülling")
+                name.set("Nora Fülling")
                 email.set("mail@chojo.dev")
                 url.set("https://github.com/rainbowdashlabs")
             }
@@ -98,43 +93,13 @@ mavenPublishing{
         }
     }
 
+
+
     configure(JavaLibrary(
         javadocJar = JavadocJar.Javadoc(),
         sourcesJar = true
     ))
 }
-
-//
-//indra {
-//
-//    publishReleasesTo("central", "https://central.sonatype.com")
-//
-//    javaVersions {
-//        target(17)
-//        testWith(17)
-//    }
-//
-//    github("rainbowdashlabs", "ocular") {
-//        ci(true)
-//    }
-//
-//    lgpl3OrLaterLicense()
-//
-//    signWithKeyFromPrefixedProperties("rainbowdashlabs")
-//
-//    configurePublications {
-//        pom {
-//            developers {
-//                developer {
-//                    id.set("rainbowdashlabs")
-//                    name.set("Lilly Fülling")
-//                    email.set("mail@chojo.dev")
-//                    url.set("https://github.com/rainbowdashlabs")
-//                }
-//            }
-//        }
-//    }
-//}
 
 tasks {
     test {

@@ -24,11 +24,6 @@ dependencyResolutionManagement {
             plugin("spotless", "com.diffplug.spotless").version("7.2.1")
             plugin("shadow", "com.github.johnrengelman.shadow").version("8.1.1")
 
-            version("indra", "3.2.0")
-            plugin("indra-core", "net.kyori.indra").versionRef("indra")
-            plugin("indra-publishing", "net.kyori.indra.publishing").versionRef("indra")
-            plugin("indra-sonatype", "net.kyori.indra.publishing.sonatype").versionRef("indra")
-
             version("slf4j", "2.0.17")
             library("slf4j-api", "org.slf4j", "slf4j-api").versionRef("slf4j")
         }
