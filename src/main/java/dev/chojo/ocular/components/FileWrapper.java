@@ -5,7 +5,7 @@
  */
 package dev.chojo.ocular.components;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 
 /**
  * A generic wrapper class that associates a file object with a specific data format
@@ -21,13 +21,12 @@ public record FileWrapper<T>(Format<?, ?> format, T file) {
      * using the configured writer of the associated format.
      *
      * @return the JSON string representation of the file object
-     * @throws JsonProcessingException if an error occurs during serialization
+     * @throws JacksonException if an error occurs during serialization
      */
-    public String asString() throws JsonProcessingException {
+    public String asString() throws JacksonException {
         if (format.format().enablePrettyPrint()) {
             return format.writer().writerWithDefaultPrettyPrinter().writeValueAsString(file);
         }
-
         return format.writer().writeValueAsString(file);
     }
 }

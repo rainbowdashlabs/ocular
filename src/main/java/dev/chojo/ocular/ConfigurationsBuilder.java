@@ -5,14 +5,14 @@
  */
 package dev.chojo.ocular;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.impl.ModifyableConfigurations;
 import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.util.Consumers;
 import org.jetbrains.annotations.NotNull;
+import tools.jackson.databind.JacksonModule;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -28,9 +28,9 @@ import java.util.function.Consumer;
  * @param <T> The type associated with the primary configuration key.
  */
 public class ConfigurationsBuilder<T> {
-    private Path base = Path.of(".");
     private final @NotNull Key<T> main;
     private final List<DataFormat<?, ?>> formats = new LinkedList<>();
+    private Path base = Path.of(".");
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private Configurations<?> parent = null;
     private Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder = Consumers.identity();
@@ -39,7 +39,7 @@ public class ConfigurationsBuilder<T> {
     private Consumer<ObjectMapper> configureWriterMapper = Consumers.identity();
     private Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder = Consumers.identity();
     private Consumer<ObjectMapper> configureMapper = Consumers.identity();
-    private List<Module> modules = new LinkedList<>();
+    private final List<JacksonModule> modules = new LinkedList<>();
 
 
     /**
@@ -190,7 +190,7 @@ public class ConfigurationsBuilder<T> {
      * @param module the module to be added to the builder
      * @return self
      */
-    public ConfigurationsBuilder<T> addModule(Module module) {
+    public ConfigurationsBuilder<T> addModule(JacksonModule module) {
         modules.add(module);
         return this;
     }
@@ -201,7 +201,7 @@ public class ConfigurationsBuilder<T> {
      * @param module a collection of modules to be added
      * @return self
      */
-    public ConfigurationsBuilder<T> addModule(Collection<Module> module) {
+    public ConfigurationsBuilder<T> addModule(Collection<JacksonModule> module) {
         modules.addAll(module);
         return this;
     }

@@ -5,8 +5,8 @@
  */
 package dev.chojo.ocular;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.key.Key;
 import org.jetbrains.annotations.NotNull;

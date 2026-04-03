@@ -5,8 +5,8 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 /**
  * Represents a configurable interface for setting up ObjectMapper

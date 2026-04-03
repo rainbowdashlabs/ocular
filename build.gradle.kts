@@ -1,18 +1,19 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     java
     `java-library`
     id("de.chojo.publishdata") version "1.4.0"
     alias(libs.plugins.spotless)
-    id("com.vanniktech.maven.publish") version "0.31.0"
+    id("com.vanniktech.maven.publish") version "0.36.0"
 }
+
+// OpenRewrite configuration will be passed via command line properties
 
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "1.0.2"
+    publishingVersion = "2.0.0"
 }
 
 group = "dev.chojo"
@@ -25,25 +26,27 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j", "slf4j-api", "2.0.16")
-    compileOnlyApi("org.jetbrains", "annotations", "26.0.2")
-    api("com.fasterxml.jackson.core", "jackson-databind") {
+    compileOnly("org.slf4j", "slf4j-api", "2.0.17")
+    compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
+    api("tools.jackson.core", "jackson-databind") {
         version {
-            require("2.13.0")
-            prefer("2.17.1")
+            require("3.0.0")
+            prefer("3.1.1")
         }
     }
-    compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
-    compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
+    compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
+    compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
 
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.jetbrains", "annotations", "26.0.2")
-    testImplementation("org.slf4j", "slf4j-api", "2.0.16")
-    testImplementation("org.slf4j", "slf4j-simple", "2.0.16")
-    testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
-    testImplementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
-    testImplementation("de.eldoria.jacksonbukkit", "paper", "1.2.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.0.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
+    testImplementation("org.jetbrains", "annotations", "26.1.0")
+    testImplementation("org.slf4j", "slf4j-api", "2.0.17")
+    testImplementation("org.slf4j", "slf4j-simple", "2.0.17")
+    testImplementation("tools.jackson.dataformat", "jackson-dataformat-yaml")
+    testImplementation("tools.jackson.dataformat", "jackson-dataformat-toml")
+    testImplementation("de.eldoria.jacksonbukkit", "paper", "2.0.0")
 }
 
 spotless {
@@ -55,12 +58,11 @@ spotless {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
 mavenPublishing{
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
     coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
@@ -80,7 +82,7 @@ mavenPublishing{
         developers{
             developer{
                 id.set("rainbowdashlabs")
-                name.set("Lilly Fülling")
+                name.set("Nora Fülling")
                 email.set("mail@chojo.dev")
                 url.set("https://github.com/rainbowdashlabs")
             }
@@ -93,43 +95,13 @@ mavenPublishing{
         }
     }
 
+
+
     configure(JavaLibrary(
         javadocJar = JavadocJar.Javadoc(),
         sourcesJar = true
     ))
 }
-
-//
-//indra {
-//
-//    publishReleasesTo("central", "https://central.sonatype.com")
-//
-//    javaVersions {
-//        target(17)
-//        testWith(17)
-//    }
-//
-//    github("rainbowdashlabs", "ocular") {
-//        ci(true)
-//    }
-//
-//    lgpl3OrLaterLicense()
-//
-//    signWithKeyFromPrefixedProperties("rainbowdashlabs")
-//
-//    configurePublications {
-//        pom {
-//            developers {
-//                developer {
-//                    id.set("rainbowdashlabs")
-//                    name.set("Lilly Fülling")
-//                    email.set("mail@chojo.dev")
-//                    url.set("https://github.com/rainbowdashlabs")
-//                }
-//            }
-//        }
-//    }
-//}
 
 tasks {
     test {

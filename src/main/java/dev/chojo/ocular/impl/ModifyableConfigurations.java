@@ -5,13 +5,13 @@
  */
 package dev.chojo.ocular.impl;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.Configurations;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.key.Key;
 import org.jetbrains.annotations.NotNull;
+import tools.jackson.databind.JacksonModule;
 
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ public class ModifyableConfigurations<T> extends Configurations<T> {
     private final Consumer<ObjectMapper> configureWriterMapper;
     private final Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder;
     private final Consumer<ObjectMapper> configureMapper;
-    private final List<Module> modules;
+    private final List<JacksonModule> modules;
 
 
     public ModifyableConfigurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats,
@@ -35,7 +35,7 @@ public class ModifyableConfigurations<T> extends Configurations<T> {
                                     Consumer<MapperBuilder<ObjectMapper, ?>> configureWriterBuilder,
                                     Consumer<ObjectMapper> configureWriterMapper,
                                     Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder,
-                                    Consumer<ObjectMapper> configureMapper, List<Module> modules) {
+                                    Consumer<ObjectMapper> configureMapper, List<JacksonModule> modules) {
         super(base, main, formats, classLoader, parent);
         this.configureReaderBuilder = configureReaderBuilder;
         this.configureReaderMapper = configureReaderMapper;
@@ -47,9 +47,9 @@ public class ModifyableConfigurations<T> extends Configurations<T> {
     }
 
     @Override
-    public List<Module> additionalModules() {
+    public List<JacksonModule> additionalModules() {
         if (parent != null) {
-            LinkedList<Module> combinedModules = new LinkedList<>(parent.additionalModules());
+            LinkedList<JacksonModule> combinedModules = new LinkedList<>(parent.additionalModules());
             combinedModules.addAll(modules);
             return combinedModules;
         }
