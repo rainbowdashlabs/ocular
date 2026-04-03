@@ -14,7 +14,7 @@ plugins {
 
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "2.1.0"
+    publishingVersion = "2.1.1"
 }
 
 group = "dev.chojo"
@@ -30,7 +30,6 @@ dependencies {
     compileOnly("org.slf4j", "slf4j-api", "2.0.17")
     compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
     annotationProcessor("org.jetbrains:annotations:26.1.0") // to avoid warnings if any
-    // ... rest of dependencies
     api("tools.jackson.core", "jackson-databind") {
         version {
             require("3.0.0")

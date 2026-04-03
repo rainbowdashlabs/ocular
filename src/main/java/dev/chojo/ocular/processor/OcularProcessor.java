@@ -153,12 +153,11 @@ public class OcularProcessor extends AbstractProcessor {
         String packageName = ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString();
         // Full name like "com.example.MyConfig"
         String fullClassName = typeElement.getQualifiedName().toString();
-        // Simple name like "MyConfig" — used for deriving default env / prop names
-        String className = typeElement.getSimpleName().toString();
 
+        // Simple name like "MyConfig" — used for deriving default env / prop names
         // Check if the class has @OverwritePrefix to override the class name prefix
         // and optionally force it onto explicitly provided names too.
-        String prefix = className;
+        String prefix = typeElement.getSimpleName().toString();
         boolean forcePrefix = false;
         OverwritePrefix overwritePrefix = typeElement.getAnnotation(OverwritePrefix.class);
         if (overwritePrefix != null) {
@@ -239,6 +238,8 @@ public class OcularProcessor extends AbstractProcessor {
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> values = (List<? extends AnnotationValue>) entry.getValue().getValue();
             if ("prop".equals(attrName)) {
+                // make sure that the prefix is adjusted for whatever input format is used.
+                prefix = prefix.replace("_", ".").toLowerCase();
                 // For each @Prop in the array, generate code that reads a JVM system property
                 for (AnnotationValue av : values) {
                     // Each element in the array is itself an annotation mirror (the @Prop annotation)
@@ -247,25 +248,26 @@ public class OcularProcessor extends AbstractProcessor {
                     String key = extractStringValue(sysMirror, "value");
                     if (key == null || key.isEmpty()) {
                         // No custom name provided — derive default: "prefix.fieldName"
-                        key = prefix.toLowerCase() + "." + fieldName;
+                        key = prefix + "." + fieldName;
                     } else if (forcePrefix) {
                         // Force mode: always prepend the prefix, even for explicit names
-                        key = prefix.toLowerCase() + "." + key;
+                        key = prefix + "." + key;
                     }
                     // Write Java code like: String value = System.getProperty("myclass.host");
                     emitLookup(out, fieldName, "System.getProperty(\"" + key + "\")");
                 }
             } else if ("env".equals(attrName)) {
+                prefix = prefix.replace(".", "_").toUpperCase();
                 // For each @Env in the array, generate code that reads an environment variable
                 for (AnnotationValue av : values) {
                     AnnotationMirror envMirror = (AnnotationMirror) av.getValue();
                     String key = extractStringValue(envMirror, "value");
                     if (key == null || key.isEmpty()) {
                         // No custom name provided — derive default: "PREFIX_FIELDNAME"
-                        key = prefix.toUpperCase() + "_" + fieldName.toUpperCase();
+                        key = prefix + "_" + fieldName.toUpperCase();
                     } else if (forcePrefix) {
                         // Force mode: always prepend the prefix, even for explicit names
-                        key = prefix.toUpperCase() + "_" + key;
+                        key = prefix + "_" + key;
                     }
                     // Write Java code like: String value = System.getenv("MYCLASS_HOST");
                     emitLookup(out, fieldName, "System.getenv(\"" + key + "\")");
