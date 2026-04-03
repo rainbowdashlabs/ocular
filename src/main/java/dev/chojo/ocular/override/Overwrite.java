@@ -19,20 +19,24 @@ import java.lang.annotation.Target;
  * variables and/or system properties.
  * <p>
  * You can specify one or more {@link EnvVar} and/or {@link SysProp} sources. The order you
- * declare them matters: sources listed later take priority over earlier ones. For example:
+ * declare them matters: the first source that provides a value wins. For example:
  * <pre>{@code
  * @Overwrite(sys = @SysProp(), env = @EnvVar())
  * private String host;
  * }</pre>
  * This will first check the system property, then the environment variable. If both are set,
- * the environment variable wins because it is declared last.
+ * the system property wins because it is declared first.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface Overwrite {
-    /** Environment variable sources to check for an override value. */
+    /**
+     * Environment variable sources to check for an override value.
+     */
     EnvVar[] env() default {};
 
-    /** System property sources to check for an override value. */
+    /**
+     * System property sources to check for an override value.
+     */
     SysProp[] sys() default {};
 }

@@ -12,6 +12,7 @@ nav:
   - Home: index.md
   - 'Create a Configuration': configuration_creation.md
   - 'Customise a Configuration': customise.md
+  - 'Configuration Overrides': overrides.md
   - 'Examples':
       - 'Jackson Bukkit': examples/jackson_bukkit.md
 theme:

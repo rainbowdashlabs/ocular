@@ -54,13 +54,6 @@ class JacksonOverrideTest {
         }
     }
 
-    private JacksonOverrideConfig loadViaConfigurations() {
-        Configurations<JacksonOverrideConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
-                                                                   .setBase(BASE)
-                                                                   .build();
-        return conf.main();
-    }
-
     @Test
     void deserializesCorrectlyWithoutOverrides() {
         JacksonOverrideConfig config = loadViaConfigurations();
@@ -119,5 +112,12 @@ class JacksonOverrideTest {
         assertEquals(8080, config.port());
         assertFalse(config.debug());
         assertEquals("hello", config.greeting());
+    }
+
+    private JacksonOverrideConfig loadViaConfigurations() {
+        Configurations<JacksonOverrideConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
+                                                                   .setBase(BASE)
+                                                                   .build();
+        return conf.main();
     }
 }

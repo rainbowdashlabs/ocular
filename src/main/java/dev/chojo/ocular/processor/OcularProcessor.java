@@ -5,6 +5,7 @@
  */
 package dev.chojo.ocular.processor;
 
+import dev.chojo.ocular.override.OverridePrefix;
 import dev.chojo.ocular.override.Overwrite;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -42,7 +43,7 @@ import java.util.Set;
  * <b>What the generated class looks like:</b> For a config class {@code com.example.MyConfig},
  * the processor creates {@code com.example.MyConfig_OcularOverride}. This generated class:
  * <ol>
- *   <li>Implements {@link dev.chojo.ocular.override.ValueSupplier}.</li>
+ *   <li>Implements {@link dev.chojo.ocular.override.ValueSupplier ValueSupplier}.</li>
  *   <li>In its constructor, reads the relevant environment variables and system properties
  *       (as declared in the {@code @Overwrite} annotations) and stores any found values in a map.</li>
  *   <li>Provides a {@code getValue(fieldName)} method that returns the override value for a given field,
@@ -52,9 +53,9 @@ import java.util.Set;
  * <b>How it connects to the rest of the system:</b>
  * <ol>
  *   <li>This processor generates the code at compile time.</li>
- *   <li>At runtime, {@link dev.chojo.ocular.Configurations} loads the generated class via reflection
+ *   <li>At runtime, {@link dev.chojo.ocular.Configurations Configurations} loads the generated class via reflection
  *       (by looking for {@code ClassName_OcularOverride}).</li>
- *   <li>{@link dev.chojo.ocular.override.OverrideApplier} then uses the generated supplier to
+ *   <li>{@link dev.chojo.ocular.override.OverrideApplier OverrideApplier} then uses the generated supplier to
  *       overwrite fields in the deserialized config object.</li>
  * </ol>
  * <p>
@@ -74,6 +75,28 @@ public class OcularProcessor extends AbstractProcessor {
     private Messager messager;
 
     /**
+     * Writes a single lookup block into the generated constructor.
+     * The generated code reads a value (from env or sys prop) and, if non-null, stores it in the map.
+     */
+    private static void emitLookup(SourceWriter out, String fieldName, String lookupExpression) throws IOException {
+        // This writes a small block of Java code into the generated constructor. For example,
+        // for a field "host" with System.getenv("MY_HOST"), the generated code would be:
+        //
+        //   {
+        //       String value = System.getenv("MY_HOST");
+        //       if (value != null && !overrides.containsKey("host")) overrides.put("host", value);
+        //   }
+        //
+        // The braces create a local scope so the "value" variable doesn't conflict between lookups.
+        // If the env var / sys prop is set, it gets stored in the map keyed by the field name.
+        // If multiple lookups target the same field, the first non-null one wins (later lookups are skipped).
+        out.beginBlock("{");
+        out.println("String value = {};", lookupExpression);
+        out.println("if (value != null && !overrides.containsKey(\"{}\")) overrides.put(\"{}\", value);", fieldName, fieldName);
+        out.endBlock();
+    }
+
+    /**
      * Called once by the compiler before processing begins.
      * We grab references to the {@link Filer} (used to create new source files)
      * and the {@link Messager} (used to report errors/warnings back to the compiler).
@@ -89,7 +112,7 @@ public class OcularProcessor extends AbstractProcessor {
      * Main entry point called by the compiler for each processing round.
      * <p>
      * Step 1: Find all fields/methods annotated with {@code @Overwrite} and group them by
-     *         their enclosing class (the config class they belong to).
+     * their enclosing class (the config class they belong to).
      * Step 2: For each config class, generate a new {@code _OcularOverride} source file.
      */
     @Override
@@ -132,6 +155,16 @@ public class OcularProcessor extends AbstractProcessor {
         String fullClassName = typeElement.getQualifiedName().toString();
         // Simple name like "MyConfig" — used for deriving default env var / sys prop names
         String className = typeElement.getSimpleName().toString();
+
+        // Check if the class has @OverridePrefix to override the class name prefix
+        // and optionally force it onto explicitly provided names too.
+        String prefix = className;
+        boolean forcePrefix = false;
+        OverridePrefix overridePrefix = typeElement.getAnnotation(OverridePrefix.class);
+        if (overridePrefix != null) {
+            prefix = overridePrefix.value();
+            forcePrefix = overridePrefix.force();
+        }
         // The name of the class we're about to generate, e.g. "MyConfig_OcularOverride"
         // For inner classes like "Outer.Inner", dots become underscores: "Outer_Inner_OcularOverride"
         String generatedClassName = fullClassName.substring(packageName.length() + 1).replace('.', '_') + "_OcularOverride";
@@ -159,7 +192,7 @@ public class OcularProcessor extends AbstractProcessor {
             for (Element element : elements) {
                 String fieldName = element.getSimpleName().toString();
                 // Write the lookup code for this field's env/sys sources into the constructor
-                emitLookupsInOrder(out, element, className, fieldName);
+                emitLookupsInOrder(out, element, prefix, forcePrefix, fieldName);
             }
             out.endBlock();
 
@@ -177,15 +210,15 @@ public class OcularProcessor extends AbstractProcessor {
      * Writes Java code into the generated constructor that looks up override values for one field.
      * <p>
      * The lookups are emitted in the exact order the user declared {@code sys} and {@code env}
-     * in their {@code @Overwrite} annotation. This matters because later lookups overwrite earlier
-     * ones in the map, so the last source declared wins.
+     * in their {@code @Overwrite} annotation. This matters because the first non-null lookup
+     * wins — once a value is set for a field, subsequent lookups do not overwrite it.
      * <p>
      * We use "annotation mirrors" here instead of calling annotation methods directly. This is
      * necessary because annotation processors run at compile time and can only inspect the source
      * code structure (mirrors), not the actual runtime annotation objects. Mirrors preserve the
      * declaration order of attributes, which is essential for correct precedence.
      */
-    private void emitLookupsInOrder(SourceWriter out, Element element, String className, String fieldName) throws IOException {
+    private void emitLookupsInOrder(SourceWriter out, Element element, String prefix, boolean forcePrefix, String fieldName) throws IOException {
         // Get the compile-time representation ("mirror") of the @Overwrite annotation on this field.
         // We need the mirror (not the annotation object) because at compile time the annotation class
         // isn't loaded as a real object — it only exists as metadata in the source code.
@@ -197,6 +230,7 @@ public class OcularProcessor extends AbstractProcessor {
         //   1. "sys" -> [@SysProp()]
         //   2. "env" -> [@EnvVar()]
         // The iteration order matches the source code order, which determines override precedence.
+        // The first source that provides a non-null value wins.
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
                 overwriteMirror.getElementValues().entrySet()) {
             // attrName is either "sys" or "env" — the attribute name from @Overwrite
@@ -212,8 +246,11 @@ public class OcularProcessor extends AbstractProcessor {
                     // Read the "value" attribute of @SysProp (the custom property name, if provided)
                     String key = extractStringValue(sysMirror, "value");
                     if (key == null || key.isEmpty()) {
-                        // No custom name provided — derive default: "classname.fieldName"
-                        key = className.toLowerCase() + "." + fieldName;
+                        // No custom name provided — derive default: "prefix.fieldName"
+                        key = prefix.toLowerCase() + "." + fieldName;
+                    } else if (forcePrefix) {
+                        // Force mode: always prepend the prefix, even for explicit names
+                        key = prefix.toLowerCase() + "." + key;
                     }
                     // Write Java code like: String value = System.getProperty("myclass.host");
                     emitLookup(out, fieldName, "System.getProperty(\"" + key + "\")");
@@ -224,8 +261,11 @@ public class OcularProcessor extends AbstractProcessor {
                     AnnotationMirror envMirror = (AnnotationMirror) av.getValue();
                     String key = extractStringValue(envMirror, "value");
                     if (key == null || key.isEmpty()) {
-                        // No custom name provided — derive default: "CLASSNAME_FIELDNAME"
-                        key = className.toUpperCase() + "_" + fieldName.toUpperCase();
+                        // No custom name provided — derive default: "PREFIX_FIELDNAME"
+                        key = prefix.toUpperCase() + "_" + fieldName.toUpperCase();
+                    } else if (forcePrefix) {
+                        // Force mode: always prepend the prefix, even for explicit names
+                        key = prefix.toUpperCase() + "_" + key;
                     }
                     // Write Java code like: String value = System.getenv("MYCLASS_HOST");
                     emitLookup(out, fieldName, "System.getenv(\"" + key + "\")");
@@ -265,27 +305,5 @@ public class OcularProcessor extends AbstractProcessor {
             }
         }
         return null;
-    }
-
-    /**
-     * Writes a single lookup block into the generated constructor.
-     * The generated code reads a value (from env or sys prop) and, if non-null, stores it in the map.
-     */
-    private static void emitLookup(SourceWriter out, String fieldName, String lookupExpression) throws IOException {
-        // This writes a small block of Java code into the generated constructor. For example,
-        // for a field "host" with System.getenv("MY_HOST"), the generated code would be:
-        //
-        //   {
-        //       String value = System.getenv("MY_HOST");
-        //       if (value != null) overrides.put("host", value);
-        //   }
-        //
-        // The braces create a local scope so the "value" variable doesn't conflict between lookups.
-        // If the env var / sys prop is set, it gets stored in the map keyed by the field name.
-        // If multiple lookups target the same field, the last non-null one wins (it overwrites the map entry).
-        out.beginBlock("{");
-        out.println("String value = {};", lookupExpression);
-        out.println("if (value != null) overrides.put(\"{}\", value);", fieldName);
-        out.endBlock();
     }
 }

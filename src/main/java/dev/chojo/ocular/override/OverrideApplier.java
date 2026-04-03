@@ -31,7 +31,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public final class OverrideApplier {
     private static final Logger log = getLogger(OverrideApplier.class);
 
-    private OverrideApplier() {}
+    private OverrideApplier() {
+    }
 
     /**
      * Applies all available overrides from the given supplier to the configuration object.

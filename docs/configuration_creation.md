@@ -34,9 +34,8 @@ If you want to use one of those you need to also import the desired data format 
 === "json"
 
     ```kts
-    implementation("com.fasterxml.jackson.core", "jackson-databind")
+    implementation("tools.jackson.core", "jackson-databind")
     ```
-
 === "yaml"
 
     !!! warning "Minecraft Users"
@@ -44,15 +43,15 @@ If you want to use one of those you need to also import the desired data format 
         Be aware that jacksons yaml format depends on snakeyaml, which is bundled in spigot and paper. You need to use relocation in that case and shade the complete jackson library instead of using the library builder. You might also encounter version conflicts, when the server software relies on another snakeyaml version than your jackson dataformat.
 
     ```kts
-    implementation("com.fasterxml.jackson.core", "jackson-databind")
-    compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml")
+    implementation("tools.jackson.core", "jackson-databind")
+    compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
     ```
 
 === "toml"
 
     ```kts
-    implementation("com.fasterxml.jackson.core", "jackson-databind")
-    compileOnly("com.fasterxml.jackson.dataformat", "jackson-dataformat-toml")
+    implementation("tools.jackson.core", "jackson-databind")
+    compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
     ```
 
 ### Retrieving a data format

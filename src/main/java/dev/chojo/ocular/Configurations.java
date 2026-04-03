@@ -6,12 +6,6 @@
 package dev.chojo.ocular;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import tools.jackson.databind.MapperFeature;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.cfg.MapperBuilder;
-import tools.jackson.databind.introspect.VisibilityChecker;
-import tools.jackson.databind.type.TypeFactory;
 import dev.chojo.ocular.components.FileWrapper;
 import dev.chojo.ocular.components.Format;
 import dev.chojo.ocular.components.Wrapper;
@@ -29,13 +23,17 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.introspect.VisibilityChecker;
+import tools.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;

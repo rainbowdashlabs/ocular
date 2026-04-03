@@ -5,14 +5,14 @@
  */
 package dev.chojo.ocular;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.impl.ModifyableConfigurations;
 import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.util.Consumers;
 import org.jetbrains.annotations.NotNull;
 import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 public class ConfigurationsBuilder<T> {
     private final @NotNull Key<T> main;
     private final List<DataFormat<?, ?>> formats = new LinkedList<>();
+    private final List<JacksonModule> modules = new LinkedList<>();
     private Path base = Path.of(".");
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private Configurations<?> parent = null;
@@ -39,7 +40,6 @@ public class ConfigurationsBuilder<T> {
     private Consumer<ObjectMapper> configureWriterMapper = Consumers.identity();
     private Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder = Consumers.identity();
     private Consumer<ObjectMapper> configureMapper = Consumers.identity();
-    private final List<JacksonModule> modules = new LinkedList<>();
 
 
     /**

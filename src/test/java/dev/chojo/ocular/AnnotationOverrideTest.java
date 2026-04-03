@@ -56,13 +56,6 @@ class AnnotationOverrideTest {
         }
     }
 
-    private AnnotationConfig loadViaConfigurations() {
-        Configurations<AnnotationConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
-                                                              .setBase(BASE)
-                                                              .build();
-        return conf.main();
-    }
-
     @Test
     void defaultSysPropOverridesField() {
         System.setProperty("annotationconfig.test", "from-sys");
@@ -82,26 +75,27 @@ class AnnotationOverrideTest {
     }
 
     @Test
-    void envFirstSysTakesPrecedence() {
-        // In AnnotationTest: @Overwrite(env = @EnvVar("MY_ENV"), sys = @SysProp("my.sys"))
-        // env is checked first, then sys overrides — sys takes precedence
-        System.setProperty("my.sys", "sys-wins");
+    void envFirstEnvTakesPrecedence() {
+        // In AnnotationConfig: @Overwrite(env = @EnvVar("MY_ENV"), sys = @SysProp("my.sys"))
+        // env is declared first, so it takes precedence — but env vars can't be set at runtime,
+        // so when only sys is set, sys is used as fallback.
+        System.setProperty("my.sys", "sys-fallback");
 
         AnnotationConfig target = loadViaConfigurations();
 
-        assertEquals("sys-wins", target.envFirst);
+        assertEquals("sys-fallback", target.envFirst);
     }
 
     @Test
-    void multiSysLaterOverridesEarlier() {
+    void multiSysEarlierTakesPrecedence() {
         // @Overwrite(sys = {@SysProp("primary.prop"), @SysProp("fallback.prop")})
-        // Both set: fallback.prop (later) overrides primary.prop
+        // Both set: primary.prop (declared first) wins
         System.setProperty("primary.prop", "primary");
         System.setProperty("fallback.prop", "fallback");
 
         AnnotationConfig target = loadViaConfigurations();
 
-        assertEquals("fallback", target.multiSys);
+        assertEquals("primary", target.multiSys);
     }
 
     @Test
@@ -116,8 +110,8 @@ class AnnotationOverrideTest {
     @Test
     void mixedMultipleSysPropApplied() {
         // @Overwrite(sys = @SysProp("base.prop"), env = {@EnvVar("ENV_A"), @EnvVar("ENV_B")})
-        // sys checked first, then env overrides — but env vars can't be set at runtime,
-        // so only sys prop is applied here
+        // sys is declared first, so it takes precedence. Env vars can't be set at runtime,
+        // so sys prop is used here regardless.
         System.setProperty("base.prop", "base-value");
 
         AnnotationConfig target = loadViaConfigurations();
@@ -153,5 +147,12 @@ class AnnotationOverrideTest {
         assertEquals("original-multiSys", target.multiSys);
         assertEquals("original-multiEnv", target.multiEnv);
         assertEquals("original-mixed", target.mixedMultiple);
+    }
+
+    private AnnotationConfig loadViaConfigurations() {
+        Configurations<AnnotationConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
+                                                              .setBase(BASE)
+                                                              .build();
+        return conf.main();
     }
 }
