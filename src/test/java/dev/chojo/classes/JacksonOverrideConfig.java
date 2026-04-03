@@ -38,7 +38,6 @@ public class JacksonOverrideConfig {
         this.greeting = greeting;
     }
 
-    @Overwrite(sys = @SysProp("config.greeting"), env = @EnvVar("CONFIG_GREETING"))
     public void greeting(String greeting) {
         this.greeting = greeting;
     }
@@ -55,6 +54,7 @@ public class JacksonOverrideConfig {
         return debug;
     }
 
+    @Overwrite(sys = @SysProp("config.greeting"), env = @EnvVar("CONFIG_GREETING"))
     public String greeting() {
         return greeting;
     }

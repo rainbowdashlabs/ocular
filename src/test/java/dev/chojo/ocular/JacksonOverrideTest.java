@@ -90,6 +90,21 @@ class JacksonOverrideTest {
     }
 
     @Test
+    void greetingOverwrittenViaSysProp() {
+        System.setProperty("config.greeting", "overridden-greeting");
+
+        JacksonOverrideConfig config = loadViaConfigurations();
+
+        // The greeting field is private and only accessible via the greeting() method,
+        // which is annotated with @Overwrite. Verify the override is applied.
+        assertEquals("overridden-greeting", config.greeting());
+        // Original values for other fields remain unchanged
+        assertEquals("localhost", config.host());
+        assertEquals(8080, config.port());
+        assertFalse(config.debug());
+    }
+
+    @Test
     void fieldAndMethodOverridesCombined() {
         System.setProperty("config.host", "override-host");
         System.setProperty("config.port", "3000");

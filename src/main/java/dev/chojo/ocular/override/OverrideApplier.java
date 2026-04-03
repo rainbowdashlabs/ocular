@@ -102,6 +102,80 @@ public final class OverrideApplier {
                 }
             }
         }
+
+        // Handle @Overwrite annotations on zero-parameter methods (getters).
+        // When a getter like "greetingValue()" is annotated, the override is keyed by the method
+        // name. Since we can't "set" a value through a getter, we need to find the backing field.
+        // Strategy: look for a field whose name the method name starts with (e.g. "greetingValue"
+        // starts with "greeting"), or try stripping common getter prefixes like "get"/"is".
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (method.getParameterCount() != 0) continue;
+            Optional<Object> override = supplier.getValue(method.getName());
+            if (override.isPresent()) {
+                Field targetField = findBackingField(clazz, method.getName(), method.getReturnType());
+                if (targetField != null) {
+                    try {
+                        targetField.setAccessible(true);
+                        Object value = convertValue(targetField.getType(), override.get());
+                        if (value != null) {
+                            targetField.set(object, value);
+                        }
+                    } catch (IllegalAccessException e) {
+                        log.warn("Could not set override for getter {}: {}", method.getName(), e.getMessage());
+                    } catch (NumberFormatException e) {
+                        log.warn("Could not convert override value for getter {}: {}", method.getName(), e.getMessage());
+                    }
+                } else {
+                    log.warn("Could not find backing field for getter method {}", method.getName());
+                }
+            }
+        }
+    }
+
+    /**
+     * Finds the backing field for a getter method by trying several strategies:
+     * <ol>
+     *   <li>Exact name match (method name equals field name)</li>
+     *   <li>JavaBean getter convention: strip "get"/"is" prefix and lowercase first char</li>
+     *   <li>Prefix match: find a field whose name the method name starts with,
+     *       preferring the longest matching field name (e.g. "greetingValue" matches "greeting")</li>
+     * </ol>
+     * Only fields whose type is compatible with the method's return type are considered.
+     */
+    private static Field findBackingField(Class<?> clazz, String methodName, Class<?> returnType) {
+        // Strategy 1: exact name match
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.getName().equals(methodName) && field.getType().equals(returnType)) {
+                return field;
+            }
+        }
+
+        // Strategy 2: JavaBean getter convention (getHost -> host, isDebug -> debug)
+        String beanFieldName = null;
+        if (methodName.startsWith("get") && methodName.length() > 3) {
+            beanFieldName = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+        } else if (methodName.startsWith("is") && methodName.length() > 2) {
+            beanFieldName = Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
+        }
+        if (beanFieldName != null) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.getName().equals(beanFieldName) && field.getType().equals(returnType)) {
+                    return field;
+                }
+            }
+        }
+
+        // Strategy 3: find the field whose name is the longest prefix of the method name
+        Field bestMatch = null;
+        int bestLength = 0;
+        for (Field field : clazz.getDeclaredFields()) {
+            String fname = field.getName();
+            if (methodName.startsWith(fname) && fname.length() > bestLength && field.getType().equals(returnType)) {
+                bestMatch = field;
+                bestLength = fname.length();
+            }
+        }
+        return bestMatch;
     }
 
     /**
