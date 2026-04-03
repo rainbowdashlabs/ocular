@@ -37,7 +37,7 @@ dependencies {
     compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
     compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
 
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.jetbrains", "annotations", "26.0.2")
     testImplementation("org.slf4j", "slf4j-api", "2.0.17")
