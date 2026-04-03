@@ -37,8 +37,8 @@ dependencies {
     compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
     compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.0.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
     testImplementation("org.jetbrains", "annotations", "26.1.0")
