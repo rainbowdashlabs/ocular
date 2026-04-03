@@ -23,6 +23,8 @@ import dev.chojo.ocular.hooks.ConfigSubscriber;
 import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.locks.KeyLock;
 import dev.chojo.ocular.locks.KeyLocks;
+import dev.chojo.ocular.override.OverrideApplier;
+import dev.chojo.ocular.override.ValueSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import tools.jackson.core.JacksonException;
@@ -362,10 +364,44 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             if (v instanceof ConfigSubscriber sub) {
                 sub.postRead(this);
             }
+            applyOverrides(v, clazz);
             return new FileWrapper<>(format, v);
         } catch (JacksonException e) {
             log.error("Could not read configuration file from {}", path, e);
             throw new ConfigurationException("Could not read configuration file from " + path, e);
+        }
+    }
+
+    /**
+     * Attempts to apply environment variable and system property overrides to a deserialized config object.
+     * <p>
+     * This is the runtime bridge between the config file and the compile-time generated override classes.
+     * It tries to find a generated class named {@code <ConfigClass>_OcularOverride} (created by
+     * {@link dev.chojo.ocular.processor.OcularProcessor} during compilation). If found, it instantiates
+     * the generated {@link ValueSupplier} and delegates to {@link OverrideApplier} to replace field values.
+     * <p>
+     * If no generated class exists (i.e. the config class has no {@code @Overwrite} annotations),
+     * this method silently does nothing.
+     */
+    private <V> void applyOverrides(V object, Class<V> clazz) {
+        String baseName = clazz.getName();
+        // Inner classes use '$' in Class.getName() (e.g. "Outer$Inner") but the generated class
+        // uses '_' instead (e.g. "Outer_Inner_OcularOverride"), so we try both naming conventions.
+        for (String candidate : List.of(baseName.replace('$', '_'), baseName)) {
+            try {
+                // Look up the generated override class by its conventional name
+                Class<?> overrideClass = Class.forName(candidate + "_OcularOverride", true, classLoader);
+                // Create an instance — the constructor reads env vars and sys props into its internal map
+                ValueSupplier supplier = (ValueSupplier) overrideClass.getDeclaredConstructor().newInstance();
+                // Apply the collected override values to the config object's fields/methods
+                OverrideApplier.applyOverrides(object, supplier);
+                return;
+            } catch (ClassNotFoundException ignored) {
+                // No generated class for this naming variant — try the next one
+            } catch (ReflectiveOperationException e) {
+                log.warn("Could not apply overrides for class {}: {}", clazz.getName(), e.getMessage());
+                return;
+            }
         }
     }
 
