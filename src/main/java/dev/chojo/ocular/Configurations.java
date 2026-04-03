@@ -389,7 +389,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             try {
                 // Look up the generated override class by its conventional name
                 Class<?> overrideClass = Class.forName(candidate + "_OcularOverride", true, classLoader);
-                // Create an instance — the constructor reads env vars and sys props into its internal map
+                // Create an instance — the constructor reads env and props into its internal map
                 ValueSupplier supplier = (ValueSupplier) overrideClass.getDeclaredConstructor().newInstance();
                 // Apply the collected override values to the config object's fields/methods
                 OverrideApplier.applyOverrides(object, supplier);

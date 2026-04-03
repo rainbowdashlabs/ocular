@@ -27,24 +27,24 @@ Add the annotation processor to your build so it runs during compilation:
 
 Use the `@Overwrite` annotation on any field you want to be overridable. Inside `@Overwrite`, you specify the sources to check:
 
-- `@EnvVar` — read from an environment variable
-- `@SysProp` — read from a JVM system property (`-D` flag)
+- `@Env` — read from an environment variable
+- `@Prop` — read from a JVM system property (`-D` flag)
 
 ### Basic Example
 
 ```java
 import dev.chojo.ocular.override.Overwrite;
-import dev.chojo.ocular.override.EnvVar;
-import dev.chojo.ocular.override.SysProp;
+import dev.chojo.ocular.override.Env;
+import dev.chojo.ocular.override.Prop;
 
 public class AppConfig {
-    @Overwrite(env = @EnvVar("APP_HOST"), sys = @SysProp("app.host"))
+    @Overwrite(env = @Env("APP_HOST"), prop= @Prop("app.host"))
     private String host = "localhost";
 
-    @Overwrite(env = @EnvVar("APP_PORT"), sys = @SysProp("app.port"))
+    @Overwrite(env = @Env("APP_PORT"), prop= @Prop("app.port"))
     private int port = 8080;
 
-    @Overwrite(env = @EnvVar("APP_DEBUG"))
+    @Overwrite(env = @Env("APP_DEBUG"))
     private boolean debug = false;
 }
 ```
@@ -59,12 +59,12 @@ With this configuration:
 
 If you don't provide an explicit name, Ocular derives one automatically:
 
-- `@EnvVar()` (no name) → `CLASSNAME_FIELDNAME` in uppercase. For example, field `host` in class `AppConfig` becomes `APPCONFIG_HOST`.
-- `@SysProp()` (no name) → `classname.fieldName` in lowercase dot notation. For example, field `host` in class `AppConfig` becomes `appconfig.host`.
+- `@Env()` (no name) → `CLASSNAME_FIELDNAME` in uppercase. For example, field `host` in class `AppConfig` becomes `APPCONFIG_HOST`.
+- `@Prop()` (no name) → `classname.fieldName` in lowercase dot notation. For example, field `host` in class `AppConfig` becomes `appconfig.host`.
 
 ```java
 public class AppConfig {
-    @Overwrite(env = @EnvVar(), sys = @SysProp())
+    @Overwrite(env = @Env(), prop= @Prop())
     private String host = "localhost";
     // Checks env var APPCONFIG_HOST and system property appconfig.host
 }
@@ -72,41 +72,41 @@ public class AppConfig {
 
 ### Precedence
 
-The order of `env` and `sys` inside `@Overwrite` determines priority. **The first source declared wins** — once a value is found, later sources are ignored.
+The order of `env` and `prop` inside `@Overwrite` determines priority. **The first source declared wins** — once a value is found, later sources are ignored.
 
 ```java
 // System property is checked first, then environment variable.
 // If both are set, the system property wins (declared first).
-@Overwrite(sys = @SysProp("app.host"), env = @EnvVar("APP_HOST"))
+@Overwrite(prop= @Prop("app.host"), env = @Env("APP_HOST"))
 private String host;
 
 // Environment variable is checked first, then system property.
 // If both are set, the environment variable wins (declared first).
-@Overwrite(env = @EnvVar("APP_HOST"), sys = @SysProp("app.host"))
+@Overwrite(env = @Env("APP_HOST"), prop= @Prop("app.host"))
 private String host;
 ```
 
-## Custom Prefix with `@OverridePrefix`
+## Custom Prefix with `@OverwritePrefix`
 
-By default, automatically derived names use the class name as a prefix (e.g. `APPCONFIG_HOST`). You can replace this prefix by annotating the class with `@OverridePrefix`:
+By default, automatically derived names use the class name as a prefix (e.g. `APPCONFIG_HOST`). You can replace this prefix by annotating the class with `@OverwritePrefix`:
 
 ```java
-import dev.chojo.ocular.override.OverridePrefix;
+import dev.chojo.ocular.override.OverwritePrefix;
 
-@OverridePrefix("myapp")
+@OverwritePrefix("myapp")
 public class AppConfig {
-    @Overwrite(env = @EnvVar(), sys = @SysProp())
+    @Overwrite(env = @Env(), prop= @Prop())
     private String host = "localhost";
     // Checks env var MYAPP_HOST and system property myapp.host
 }
 ```
 
-When an explicit name is provided in `@EnvVar` or `@SysProp`, the prefix is **not** applied by default:
+When an explicit name is provided in `@Env` or `@Prop`, the prefix is **not** applied by default:
 
 ```java
-@OverridePrefix("myapp")
+@OverwritePrefix("myapp")
 public class AppConfig {
-    @Overwrite(env = @EnvVar("CUSTOM_HOST"))
+    @Overwrite(env = @Env("CUSTOM_HOST"))
     private String host = "localhost";
     // Checks env var CUSTOM_HOST (not MYAPP_CUSTOM_HOST)
 }
@@ -117,9 +117,9 @@ public class AppConfig {
 Set `force = true` to always prepend the prefix, even when an explicit name is given:
 
 ```java
-@OverridePrefix(value = "myapp", force = true)
+@OverwritePrefix(value = "myapp", force = true)
 public class AppConfig {
-    @Overwrite(env = @EnvVar("HOST"), sys = @SysProp("port"))
+    @Overwrite(env = @Env("HOST"), prop= @Prop("port"))
     private String host = "localhost";
     // Checks env var MYAPP_HOST and system property myapp.port
 }
@@ -127,8 +127,8 @@ public class AppConfig {
 
 With `force = true`:
 
-- Env var names become `PREFIX_NAME` (e.g. `MYAPP_HOST`).
-- Sys prop names become `prefix.name` (e.g. `myapp.port`).
+- Env names become `PREFIX_NAME` (e.g. `MYAPP_HOST`).
+- Prop names become `prefix.name` (e.g. `myapp.port`).
 
 ## Supported Types
 

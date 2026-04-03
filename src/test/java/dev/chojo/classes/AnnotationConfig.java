@@ -5,32 +5,32 @@
  */
 package dev.chojo.classes;
 
-import dev.chojo.ocular.override.EnvVar;
+import dev.chojo.ocular.override.Env;
 import dev.chojo.ocular.override.Overwrite;
-import dev.chojo.ocular.override.SysProp;
+import dev.chojo.ocular.override.Prop;
 
 public class AnnotationConfig {
-    // sys checked first, then env overrides (env takes precedence)
-    @Overwrite(sys = @SysProp, env = @EnvVar)
+    // prop is declared first, so it takes precedence over env
+    @Overwrite(prop = @Prop, env = @Env)
     public String test;
 
     // explicit keys
-    @Overwrite(sys = @SysProp("sys.test"), env = @EnvVar("ENV_TEST"))
+    @Overwrite(prop = @Prop("sys.test"), env = @Env("ENV_TEST"))
     public String testPrecise;
 
-    // env checked first, then sys overrides (sys takes precedence)
-    @Overwrite(env = @EnvVar("MY_ENV"), sys = @SysProp("my.sys"))
+    // env is declared first, so it takes precedence over prop
+    @Overwrite(env = @Env("MY_ENV"), prop = @Prop("my.sys"))
     public String envFirst;
 
-    // multiple sys props: later ones override earlier
-    @Overwrite(sys = {@SysProp("primary.prop"), @SysProp("fallback.prop")})
+    // multiple props: first one with a value wins
+    @Overwrite(prop = {@Prop("primary.prop"), @Prop("fallback.prop")})
     public String multiSys;
 
-    // multiple env vars: later ones override earlier
-    @Overwrite(env = {@EnvVar("PRIMARY_ENV"), @EnvVar("FALLBACK_ENV")})
+    // multiple env vars: first one with a value wins
+    @Overwrite(env = {@Env("PRIMARY_ENV"), @Env("FALLBACK_ENV")})
     public String multiEnv;
 
-    // mixed multiple: sys checked first, then both env vars override
-    @Overwrite(sys = @SysProp("base.prop"), env = {@EnvVar("ENV_A"), @EnvVar("ENV_B")})
+    // mixed multiple: prop is declared first, so it takes precedence; env vars are fallbacks
+    @Overwrite(prop = @Prop("base.prop"), env = {@Env("ENV_A"), @Env("ENV_B")})
     public String mixedMultiple;
 }

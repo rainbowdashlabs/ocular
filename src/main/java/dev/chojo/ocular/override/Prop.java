@@ -15,11 +15,11 @@ import java.lang.annotation.Target;
  * <p>
  * Used inside {@link Overwrite @Overwrite} to declare a system property source, e.g.:
  * <pre>{@code
- * @Overwrite(sys = @SysProp("app.host"))
+ * @Overwrite(prop= @Prop("app.host"))
  * private String host;
  * }</pre>
  * <p>
- * If no explicit name is provided (i.e. {@code @SysProp()}), the property name is derived
+ * If no explicit name is provided (i.e. {@code @Prop()}), the property name is derived
  * automatically from the class name (lowercased) and field name in dot notation:
  * {@code classname.fieldName}. For example, a field {@code myCoolVariable} in class
  * {@code AppConfig} would look for the system property {@code appconfig.myCoolVariable}
@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface SysProp {
+public @interface Prop {
     /**
      * The system property name to read. Leave empty to use the auto-derived name.
      */

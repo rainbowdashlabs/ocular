@@ -7,19 +7,19 @@ package dev.chojo.classes;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.chojo.ocular.override.EnvVar;
+import dev.chojo.ocular.override.Env;
 import dev.chojo.ocular.override.Overwrite;
-import dev.chojo.ocular.override.SysProp;
+import dev.chojo.ocular.override.Prop;
 
 public class JacksonOverrideConfig {
 
-    @Overwrite(sys = @SysProp("config.host"), env = @EnvVar("CONFIG_HOST"))
+    @Overwrite(prop = @Prop("config.host"), env = @Env("CONFIG_HOST"))
     String host;
 
-    @Overwrite(sys = @SysProp("config.port"))
+    @Overwrite(prop = @Prop("config.port"))
     int port;
 
-    @Overwrite(env = @EnvVar("CONFIG_DEBUG"))
+    @Overwrite(env = @Env("CONFIG_DEBUG"))
     boolean debug;
 
     private String greeting;
@@ -54,7 +54,7 @@ public class JacksonOverrideConfig {
         return debug;
     }
 
-    @Overwrite(sys = @SysProp("config.greeting"), env = @EnvVar("CONFIG_GREETING"))
+    @Overwrite(prop = @Prop("config.greeting"), env = @Env("CONFIG_GREETING"))
     public String greeting() {
         return greeting;
     }

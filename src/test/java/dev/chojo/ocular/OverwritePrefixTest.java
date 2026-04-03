@@ -23,7 +23,7 @@ import java.util.Comparator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class OverridePrefixTest {
+class OverwritePrefixTest {
 
     private static final Path PREFIX_BASE = Path.of("prefix_test_config");
     private static final Path FORCE_BASE = Path.of("force_prefix_test_config");
@@ -67,11 +67,11 @@ class OverridePrefixTest {
         }
     }
 
-    // --- @OverridePrefix("myapp") without force ---
+    // --- @OverwritePrefix("myapp") without force ---
 
     @Test
-    void prefixUsedForDefaultSysPropName() {
-        // @OverridePrefix("myapp") + @Overwrite(sys = @SysProp) -> myapp.host
+    void prefixUsedForDefaultPropName() {
+        // @OverwritePrefix("myapp") + @Overwrite(prop = @Prop) -> myapp.host
         System.setProperty("myapp.host", "from-prefix");
 
         PrefixConfig target = loadPrefix();
@@ -81,7 +81,7 @@ class OverridePrefixTest {
 
     @Test
     void explicitNameNotPrefixedWithoutForce() {
-        // @OverridePrefix("myapp") + @Overwrite(sys = @SysProp("custom.prop")) -> custom.prop (no prefix)
+        // @OverwritePrefix("myapp") + @Overwrite(prop = @Prop("custom.prop")) -> custom.prop (no prefix)
         System.setProperty("custom.prop", "explicit-val");
 
         PrefixConfig target = loadPrefix();
@@ -97,10 +97,10 @@ class OverridePrefixTest {
         assertNull(target.explicit);
     }
 
-    // --- @OverridePrefix(value = "myapp", force = true) ---
+    // --- @OverwritePrefix(value = "myapp", force = true) ---
 
     @Test
-    void forcePrefixUsedForDefaultSysPropName() {
+    void forcePrefixUsedForDefaultPropName() {
         // force + default name -> myapp.host (same as non-force)
         System.setProperty("myapp.host", "force-default");
 
@@ -110,8 +110,8 @@ class OverridePrefixTest {
     }
 
     @Test
-    void forcePrefixPrependedToExplicitSysProp() {
-        // force + @SysProp("custom.prop") -> myapp.custom.prop
+    void forcePrefixPrependedToExplicitProp() {
+        // force + @Prop("custom.prop") -> myapp.custom.prop
         System.setProperty("myapp.custom.prop", "force-explicit");
 
         ForcePrefixConfig target = loadForce();

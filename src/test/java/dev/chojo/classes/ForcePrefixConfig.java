@@ -5,19 +5,19 @@
  */
 package dev.chojo.classes;
 
-import dev.chojo.ocular.override.EnvVar;
-import dev.chojo.ocular.override.OverridePrefix;
+import dev.chojo.ocular.override.Env;
+import dev.chojo.ocular.override.OverwritePrefix;
 import dev.chojo.ocular.override.Overwrite;
-import dev.chojo.ocular.override.SysProp;
+import dev.chojo.ocular.override.Prop;
 
-@OverridePrefix(value = "myapp", force = true)
+@OverwritePrefix(value = "myapp", force = true)
 public class ForcePrefixConfig {
-    // Default names: sys -> myapp.host, env -> MYAPP_HOST
-    @Overwrite(sys = @SysProp, env = @EnvVar)
+    // Default names: prop -> myapp.host, env -> MYAPP_HOST
+    @Overwrite(prop = @Prop, env = @Env)
     public String host;
 
     // Force mode: explicit names get prefix prepended
-    // sys -> myapp.custom.prop, env -> MYAPP_CUSTOM_ENV
-    @Overwrite(sys = @SysProp("custom.prop"), env = @EnvVar("CUSTOM_ENV"))
+    // prop -> myapp.custom.prop, env -> MYAPP_CUSTOM_ENV
+    @Overwrite(prop = @Prop("custom.prop"), env = @Env("CUSTOM_ENV"))
     public String explicit;
 }

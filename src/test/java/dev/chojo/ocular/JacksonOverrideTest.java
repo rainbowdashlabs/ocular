@@ -65,7 +65,7 @@ class JacksonOverrideTest {
     }
 
     @Test
-    void fieldOverrideViaSysProp() {
+    void fieldOverrideViaProp() {
         System.setProperty("config.host", "production.example.com");
         System.setProperty("config.port", "9090");
 
@@ -79,7 +79,7 @@ class JacksonOverrideTest {
     }
 
     @Test
-    void methodOverrideViaSysProp() {
+    void methodOverrideViaProp() {
         System.setProperty("config.greeting", "bonjour");
 
         JacksonOverrideConfig config = loadViaConfigurations();
@@ -90,7 +90,7 @@ class JacksonOverrideTest {
     }
 
     @Test
-    void greetingOverwrittenViaSysProp() {
+    void greetingOverwrittenViaProp() {
         System.setProperty("config.greeting", "overridden-greeting");
 
         JacksonOverrideConfig config = loadViaConfigurations();

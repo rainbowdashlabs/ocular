@@ -40,7 +40,7 @@ class AnnotationOverrideTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        System.clearProperty("annotationtest.test");
+        System.clearProperty("annotationconfig.test");
         System.clearProperty("sys.test");
         System.clearProperty("my.sys");
         System.clearProperty("primary.prop");
@@ -57,7 +57,7 @@ class AnnotationOverrideTest {
     }
 
     @Test
-    void defaultSysPropOverridesField() {
+    void defaultPropOverridesField() {
         System.setProperty("annotationconfig.test", "from-sys");
 
         AnnotationConfig target = loadViaConfigurations();
@@ -66,7 +66,7 @@ class AnnotationOverrideTest {
     }
 
     @Test
-    void explicitSysPropOverridesField() {
+    void explicitPropOverridesField() {
         System.setProperty("sys.test", "precise-value");
 
         AnnotationConfig target = loadViaConfigurations();
@@ -76,9 +76,9 @@ class AnnotationOverrideTest {
 
     @Test
     void envFirstEnvTakesPrecedence() {
-        // In AnnotationConfig: @Overwrite(env = @EnvVar("MY_ENV"), sys = @SysProp("my.sys"))
+        // In AnnotationConfig: @Overwrite(env = @Env("MY_ENV"), prop = @Prop("my.sys"))
         // env is declared first, so it takes precedence — but env vars can't be set at runtime,
-        // so when only sys is set, sys is used as fallback.
+        // so when only prop is set, prop is used as fallback.
         System.setProperty("my.sys", "sys-fallback");
 
         AnnotationConfig target = loadViaConfigurations();
@@ -88,7 +88,7 @@ class AnnotationOverrideTest {
 
     @Test
     void multiSysEarlierTakesPrecedence() {
-        // @Overwrite(sys = {@SysProp("primary.prop"), @SysProp("fallback.prop")})
+        // @Overwrite(prop = {@Prop("primary.prop"), @Prop("fallback.prop")})
         // Both set: primary.prop (declared first) wins
         System.setProperty("primary.prop", "primary");
         System.setProperty("fallback.prop", "fallback");
@@ -108,10 +108,33 @@ class AnnotationOverrideTest {
     }
 
     @Test
-    void mixedMultipleSysPropApplied() {
-        // @Overwrite(sys = @SysProp("base.prop"), env = {@EnvVar("ENV_A"), @EnvVar("ENV_B")})
-        // sys is declared first, so it takes precedence. Env vars can't be set at runtime,
-        // so sys prop is used here regardless.
+    void multiPropFirstMatchingValueWins() {
+        // @Overwrite(prop = {@Prop("primary.prop"), @Prop("fallback.prop")})
+        // Only fallback.prop is set — it should be used since primary.prop has no value
+        System.setProperty("fallback.prop", "from-fallback");
+
+        AnnotationConfig target = loadViaConfigurations();
+
+        assertEquals("from-fallback", target.multiSys);
+    }
+
+    @Test
+    void multiPropFirstMatchingValueWinsAllSet() {
+        // @Overwrite(prop = {@Prop("primary.prop"), @Prop("fallback.prop")})
+        // Only fallback.prop is set — it should be used since primary.prop has no value
+        System.setProperty("fallback.prop", "from-fallback");
+        System.setProperty("primary.prop", "primary");
+
+        AnnotationConfig target = loadViaConfigurations();
+
+        assertEquals("primary", target.multiSys);
+    }
+
+    @Test
+    void mixedMultiplePropApplied() {
+        // @Overwrite(prop = @Prop("base.prop"), env = {@Env("ENV_A"), @Env("ENV_B")})
+        // prop is declared first, so it takes precedence. Env vars can't be set at runtime,
+        // so prop prop is used here regardless.
         System.setProperty("base.prop", "base-value");
 
         AnnotationConfig target = loadViaConfigurations();

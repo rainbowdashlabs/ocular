@@ -67,7 +67,7 @@ public class SourceWriter implements AutoCloseable {
 
     /**
      * Opens a block: prints the line and increments indent.
-     * E.g. {@code beginBlock("public class Foo {")} prints the line then indents.
+     * E.g. {@code beginBlock("public class Foo {")}} prints the line then indents.
      */
     public void beginBlock(String format, Object... args) throws IOException {
         println(format, args);

@@ -18,10 +18,10 @@ import java.lang.annotation.Target;
  * a helper class at compile time that knows how to look up override values from environment
  * variables and/or system properties.
  * <p>
- * You can specify one or more {@link EnvVar} and/or {@link SysProp} sources. The order you
+ * You can specify one or more {@link Env} and/or {@link Prop} sources. The order you
  * declare them matters: the first source that provides a value wins. For example:
  * <pre>{@code
- * @Overwrite(sys = @SysProp(), env = @EnvVar())
+ * @Overwrite(prop = @Prop(), env = @Env())
  * private String host;
  * }</pre>
  * This will first check the system property, then the environment variable. If both are set,
@@ -33,10 +33,10 @@ public @interface Overwrite {
     /**
      * Environment variable sources to check for an override value.
      */
-    EnvVar[] env() default {};
+    Env[] env() default {};
 
     /**
      * System property sources to check for an override value.
      */
-    SysProp[] sys() default {};
+    Prop[] prop() default {};
 }

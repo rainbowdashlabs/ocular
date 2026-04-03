@@ -5,18 +5,18 @@
  */
 package dev.chojo.classes;
 
-import dev.chojo.ocular.override.EnvVar;
-import dev.chojo.ocular.override.OverridePrefix;
+import dev.chojo.ocular.override.Env;
+import dev.chojo.ocular.override.OverwritePrefix;
 import dev.chojo.ocular.override.Overwrite;
-import dev.chojo.ocular.override.SysProp;
+import dev.chojo.ocular.override.Prop;
 
-@OverridePrefix("myapp")
+@OverwritePrefix("myapp")
 public class PrefixConfig {
-    // Default names should use "myapp" prefix: sys -> myapp.host, env -> MYAPP_HOST
-    @Overwrite(sys = @SysProp, env = @EnvVar)
+    // Default names should use "myapp" prefix: prop-> myapp.host, env -> MYAPP_HOST
+    @Overwrite(prop = @Prop, env = @Env)
     public String host;
 
     // Explicit names should be used as-is (force=false by default)
-    @Overwrite(sys = @SysProp("custom.prop"))
+    @Overwrite(prop = @Prop("custom.prop"))
     public String explicit;
 }

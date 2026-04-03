@@ -63,7 +63,7 @@ public final class OverrideApplier {
                     // By default, Java prevents access to private fields from outside the class.
                     // setAccessible(true) bypasses that restriction so we can write to it.
                     field.setAccessible(true);
-                    // The override value comes as a String (from env var / sys prop), but the field
+                    // The override value comes as a String (from env / prop), but the field
                     // might be an int, boolean, etc. convertValue handles that conversion.
                     Object value = convertValue(field.getType(), override.get());
                     if (value != null) {

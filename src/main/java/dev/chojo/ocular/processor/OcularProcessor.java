@@ -5,7 +5,7 @@
  */
 package dev.chojo.ocular.processor;
 
-import dev.chojo.ocular.override.OverridePrefix;
+import dev.chojo.ocular.override.OverwritePrefix;
 import dev.chojo.ocular.override.Overwrite;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -76,7 +76,7 @@ public class OcularProcessor extends AbstractProcessor {
 
     /**
      * Writes a single lookup block into the generated constructor.
-     * The generated code reads a value (from env or sys prop) and, if non-null, stores it in the map.
+     * The generated code reads a value (from env or prop) and, if non-null, stores it in the map.
      */
     private static void emitLookup(SourceWriter out, String fieldName, String lookupExpression) throws IOException {
         // This writes a small block of Java code into the generated constructor. For example,
@@ -88,7 +88,7 @@ public class OcularProcessor extends AbstractProcessor {
         //   }
         //
         // The braces create a local scope so the "value" variable doesn't conflict between lookups.
-        // If the env var / sys prop is set, it gets stored in the map keyed by the field name.
+        // If the env / prop is set, it gets stored in the map keyed by the field name.
         // If multiple lookups target the same field, the first non-null one wins (later lookups are skipped).
         out.beginBlock("{");
         out.println("String value = {};", lookupExpression);
@@ -153,17 +153,17 @@ public class OcularProcessor extends AbstractProcessor {
         String packageName = ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString();
         // Full name like "com.example.MyConfig"
         String fullClassName = typeElement.getQualifiedName().toString();
-        // Simple name like "MyConfig" — used for deriving default env var / sys prop names
+        // Simple name like "MyConfig" — used for deriving default env / prop names
         String className = typeElement.getSimpleName().toString();
 
-        // Check if the class has @OverridePrefix to override the class name prefix
+        // Check if the class has @OverwritePrefix to override the class name prefix
         // and optionally force it onto explicitly provided names too.
         String prefix = className;
         boolean forcePrefix = false;
-        OverridePrefix overridePrefix = typeElement.getAnnotation(OverridePrefix.class);
-        if (overridePrefix != null) {
-            prefix = overridePrefix.value();
-            forcePrefix = overridePrefix.force();
+        OverwritePrefix overwritePrefix = typeElement.getAnnotation(OverwritePrefix.class);
+        if (overwritePrefix != null) {
+            prefix = overwritePrefix.value();
+            forcePrefix = overwritePrefix.force();
         }
         // The name of the class we're about to generate, e.g. "MyConfig_OcularOverride"
         // For inner classes like "Outer.Inner", dots become underscores: "Outer_Inner_OcularOverride"
@@ -186,12 +186,12 @@ public class OcularProcessor extends AbstractProcessor {
             out.println();
 
             // The constructor is where all the work happens in the generated class.
-            // For each field that had @Overwrite, we write Java code that reads the env var or sys prop
+            // For each field that had @Overwrite, we write Java code that reads the env or prop
             // and stores the result in the "overrides" map. This code runs once when the class is instantiated.
             out.beginBlock("public {}() {", generatedClassName);
             for (Element element : elements) {
                 String fieldName = element.getSimpleName().toString();
-                // Write the lookup code for this field's env/sys sources into the constructor
+                // Write the lookup code for this field's env/prop sources into the constructor
                 emitLookupsInOrder(out, element, prefix, forcePrefix, fieldName);
             }
             out.endBlock();
@@ -226,24 +226,24 @@ public class OcularProcessor extends AbstractProcessor {
         if (overwriteMirror == null) return;
 
         // Walk through each attribute of @Overwrite in the order the user wrote them.
-        // For example, in @Overwrite(sys = @SysProp(), env = @EnvVar()), we'd iterate:
-        //   1. "sys" -> [@SysProp()]
-        //   2. "env" -> [@EnvVar()]
+        // For example, in @Overwrite(prop = @Prop(), env = @Env()), we'd iterate:
+        //   1. "prop" -> [@Prop()]
+        //   2. "env" -> [@Env()]
         // The iteration order matches the source code order, which determines override precedence.
         // The first source that provides a non-null value wins.
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
                 overwriteMirror.getElementValues().entrySet()) {
-            // attrName is either "sys" or "env" — the attribute name from @Overwrite
+            // attrName is either "prop" or "env" — the attribute name from @Overwrite
             String attrName = entry.getKey().getSimpleName().toString();
-            // The value is an array of nested annotations (e.g. the @SysProp[] or @EnvVar[] array)
+            // The value is an array of nested annotations (e.g. the @Prop[] or @Env[] array)
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> values = (List<? extends AnnotationValue>) entry.getValue().getValue();
-            if ("sys".equals(attrName)) {
-                // For each @SysProp in the array, generate code that reads a JVM system property
+            if ("prop".equals(attrName)) {
+                // For each @Prop in the array, generate code that reads a JVM system property
                 for (AnnotationValue av : values) {
-                    // Each element in the array is itself an annotation mirror (the @SysProp annotation)
+                    // Each element in the array is itself an annotation mirror (the @Prop annotation)
                     AnnotationMirror sysMirror = (AnnotationMirror) av.getValue();
-                    // Read the "value" attribute of @SysProp (the custom property name, if provided)
+                    // Read the "value" attribute of @Prop (the custom property name, if provided)
                     String key = extractStringValue(sysMirror, "value");
                     if (key == null || key.isEmpty()) {
                         // No custom name provided — derive default: "prefix.fieldName"
@@ -256,7 +256,7 @@ public class OcularProcessor extends AbstractProcessor {
                     emitLookup(out, fieldName, "System.getProperty(\"" + key + "\")");
                 }
             } else if ("env".equals(attrName)) {
-                // For each @EnvVar in the array, generate code that reads an environment variable
+                // For each @Env in the array, generate code that reads an environment variable
                 for (AnnotationValue av : values) {
                     AnnotationMirror envMirror = (AnnotationMirror) av.getValue();
                     String key = extractStringValue(envMirror, "value");
@@ -292,12 +292,12 @@ public class OcularProcessor extends AbstractProcessor {
     }
 
     /**
-     * Reads a string attribute value from an annotation mirror (e.g. the {@code value} of {@code @EnvVar("MY_VAR")}).
+     * Reads a string attribute value from an annotation mirror (e.g. the {@code value} of {@code @Env("MY_VAR")}).
      */
     private String extractStringValue(AnnotationMirror mirror, String attributeName) {
         // Annotation attributes are stored as key-value pairs in the mirror.
         // The key is an ExecutableElement (representing the annotation method like "value()"),
-        // and the value is the actual value the user provided (e.g. "MY_VAR" in @EnvVar("MY_VAR")).
+        // and the value is the actual value the user provided (e.g. "MY_VAR" in @Env("MY_VAR")).
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
                 mirror.getElementValues().entrySet()) {
             if (entry.getKey().getSimpleName().toString().equals(attributeName)) {

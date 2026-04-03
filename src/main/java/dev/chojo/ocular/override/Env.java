@@ -15,11 +15,11 @@ import java.lang.annotation.Target;
  * <p>
  * Used inside {@link Overwrite @Overwrite} to declare an environment variable source, e.g.:
  * <pre>{@code
- * @Overwrite(env = @EnvVar("MY_APP_HOST"))
+ * @Overwrite(env = @Env("MY_APP_HOST"))
  * private String host;
  * }</pre>
  * <p>
- * If no explicit name is provided (i.e. {@code @EnvVar()}), the variable name is derived
+ * If no explicit name is provided (i.e. {@code @Env()}), the variable name is derived
  * automatically from the class name and field name in UPPER_CASE format:
  * {@code CLASSNAME_FIELDNAME}. For example, a field {@code myCoolVariable} in class
  * {@code AppConfig} would look for the environment variable {@code APPCONFIG_MYCOOLVARIABLE}.
@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
-public @interface EnvVar {
+public @interface Env {
     /**
      * The environment variable name to read. Leave empty to use the auto-derived name.
      */
