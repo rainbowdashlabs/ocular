@@ -5,11 +5,11 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
 import dev.chojo.ocular.key.Key;
+import tools.jackson.databind.JacksonModule;
 
 import java.util.Collections;
 import java.util.List;
@@ -91,7 +91,7 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
      * @return a list of additional Jackson modules to be registered; returns an empty list
      *         if no additional modules are needed
      */
-    default List<Module> additionalModules() {
+    default List<JacksonModule> additionalModules() {
         return Collections.emptyList();
     }
 

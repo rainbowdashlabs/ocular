@@ -5,7 +5,7 @@
  */
 package dev.chojo.ocular;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.json.JsonMapper;
 import dev.chojo.ocular.dataformats.JsonDataFormat;
 
 public class CustomJsonFormat extends JsonDataFormat {

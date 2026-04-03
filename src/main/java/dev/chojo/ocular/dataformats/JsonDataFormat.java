@@ -5,7 +5,7 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JsonDataFormat implements DataFormat<JsonMapper, JsonMapper.Builder> {
     private final boolean prettyPrint;

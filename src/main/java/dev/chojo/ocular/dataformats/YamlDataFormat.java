@@ -5,9 +5,9 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder> {
 
@@ -17,8 +17,8 @@ public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder
     }
 
     public void configure(YAMLMapper.Builder yaml) {
-        yaml.disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
-            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+        yaml.disable(YAMLWriteFeature.USE_NATIVE_TYPE_ID)
+            .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER);
     }
 
     @Override

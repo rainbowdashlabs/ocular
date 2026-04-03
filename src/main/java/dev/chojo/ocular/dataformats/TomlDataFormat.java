@@ -5,7 +5,7 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import tools.jackson.dataformat.toml.TomlMapper;
 import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
 
 public class TomlDataFormat implements DataFormat<TomlMapper, TomlMapper.Builder> {

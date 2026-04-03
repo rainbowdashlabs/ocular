@@ -5,8 +5,8 @@
  */
 package dev.chojo.ocular.components;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.Configurations;
 import dev.chojo.ocular.dataformats.DataFormat;
 
@@ -45,7 +45,6 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
             configurations.configureReader((MapperBuilder<ObjectMapper, ?>) mapper);
             format.configureReader(mapper);
             M reader = mapper.build();
-            this.configure(reader);
             configurations.configureReader(reader);
             format.configureReader(reader);
             this.reader = reader;
@@ -68,7 +67,6 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
             configurations.configureWriter((MapperBuilder<ObjectMapper, ?>) mapper);
             format.configureWriter(mapper);
             M writer = mapper.build();
-            this.configure(writer);
             configurations.configureWriter((MapperBuilder<ObjectMapper, ?>) mapper);
             format.configureWriter(mapper);
             this.writer = writer;
@@ -86,19 +84,8 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
     private void configure(B mapper) {
         format.configure(mapper);
         configurations.configure((MapperBuilder<ObjectMapper, ?>) mapper);
-    }
-
-    /**
-     * Configures the provided mapper instance by applying the settings and modules
-     * defined in the associated data format and configurations.
-     *
-     * @param mapper the mapper instance to configure
-     */
-    private void configure(M mapper) {
-        configurations.configure(mapper);
-        format.configure(mapper);
-        mapper.registerModules(configurations.additionalModules());
-        mapper.registerModules(format.additionalModules());
+        mapper.addModules(configurations.additionalModules());
+        mapper.addModules(format.additionalModules());
     }
 
     /**
