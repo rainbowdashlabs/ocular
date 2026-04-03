@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 
 plugins {
     java
@@ -64,6 +65,7 @@ java {
 
 mavenPublishing{
     signAllPublications()
+    publishToMavenCentral()
 
     coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
 
@@ -99,7 +101,7 @@ mavenPublishing{
 
     configure(JavaLibrary(
         javadocJar = JavadocJar.Javadoc(),
-        sourcesJar = true
+        sourcesJar = SourcesJar.Sources()
     ))
 }
 
