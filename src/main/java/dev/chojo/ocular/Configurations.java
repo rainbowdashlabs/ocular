@@ -54,9 +54,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class Configurations<T> implements Configurator<ObjectMapper, MapperBuilder<ObjectMapper, ?>> {
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm");
     private static final Logger log = getLogger(Configurations.class);
+    protected final Configurations<?> parent;
     private final Path base;
     private final Key<T> main;
-    protected final Configurations<?> parent;
     private final List<Format<?, ?>> formats = new LinkedList<>();
     private final ClassLoader classLoader;
     private final Map<Key<?>, FileWrapper<?>> files = new HashMap<>();
@@ -84,20 +84,6 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      */
     public static <V> ConfigurationsBuilder<V> builder(Key<V> main, DataFormat<?, ?> format) {
         return new ConfigurationsBuilder<>(main, format);
-    }
-
-
-    /**
-     * Modifies the visibility settings of a provided {@link VisibilityChecker}.
-     * Adjusts the field visibility to {@code JsonAutoDetect.Visibility.ANY} and
-     * getter visibility to {@code JsonAutoDetect.Visibility.NONE}.
-     *
-     * @param visibilityChecker the visibility checker to modify
-     * @return the updated visibility checker with the specified visibility settings
-     */
-    protected VisibilityChecker visibilityChecker(VisibilityChecker visibilityChecker) {
-        return visibilityChecker.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                                .withGetterVisibility(JsonAutoDetect.Visibility.NONE);
     }
 
     /**
@@ -142,48 +128,6 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             files.put(key, v);
             return v.file();
         }
-    }
-
-    /**
-     * Load a file defined in the configuration key.
-     * <p>
-     * Will fail if the file is not present.
-     * <p>
-     * Use {@link #createAndLoad(Key)} if you want the file to be created.
-     *
-     * @param key configuration key
-     * @param <V> type of file
-     * @return instance of file
-     */
-    protected final <V> FileWrapper<V> load(Key<V> key) {
-        if (!exists(key)) return null;
-        try {
-            return read(determineFormat(key), resolvePath(key), key.configClazz());
-        } catch (ConfigurationException e) {
-            log.error("Could not load configuration file.", e);
-            backup(key);
-            log.warn("Recreating default config");
-            write(resolvePath(key), new FileWrapper<>(determineFormat(key), key.initValue().get()));
-        }
-        return new FileWrapper<>(determineFormat(key), key.initValue().get());
-    }
-
-    /**
-     * Load a file defined in the configuration key.
-     * <p>
-     * If this file was not yet created, it will be created.
-     *
-     * @param key configuration key
-     * @param <V> type of file
-     * @return instance of file
-     */
-    protected final <V> FileWrapper<V> createAndLoad(Key<V> key) {
-        if (!exists(key)) {
-            var path = resolvePath(key);
-            log.info("Configuration file: {} does not exist. Creating.", path);
-            write(path, new FileWrapper<>(determineFormat(key), key.initValue().get()));
-        }
-        return load(key);
     }
 
     /**
@@ -251,7 +195,6 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         files.put(key, new FileWrapper<>(determineFormat(key), newValue));
     }
 
-
     /**
      * Migrates the configuration data from one key to another key.
      * This method loads the configuration associated with the source key, attaches it to the target key,
@@ -304,7 +247,6 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         files.put(key, createAndLoad(key));
     }
 
-
     @Override
     public void configure(ObjectMapper mapper) {
     }
@@ -316,7 +258,6 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                .changeDefaultVisibility(this::visibilityChecker);
     }
-
 
     public Path base() {
         return base;
@@ -332,6 +273,61 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             return parent.additionalModules();
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Modifies the visibility settings of a provided {@link VisibilityChecker}.
+     * Adjusts the field visibility to {@code JsonAutoDetect.Visibility.ANY} and
+     * getter visibility to {@code JsonAutoDetect.Visibility.NONE}.
+     *
+     * @param visibilityChecker the visibility checker to modify
+     * @return the updated visibility checker with the specified visibility settings
+     */
+    protected VisibilityChecker visibilityChecker(VisibilityChecker visibilityChecker) {
+        return visibilityChecker.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                                .withGetterVisibility(JsonAutoDetect.Visibility.NONE);
+    }
+
+    /**
+     * Load a file defined in the configuration key.
+     * <p>
+     * Will fail if the file is not present.
+     * <p>
+     * Use {@link #createAndLoad(Key)} if you want the file to be created.
+     *
+     * @param key configuration key
+     * @param <V> type of file
+     * @return instance of file
+     */
+    protected final <V> FileWrapper<V> load(Key<V> key) {
+        if (!exists(key)) return null;
+        try {
+            return read(determineFormat(key), resolvePath(key), key.configClazz());
+        } catch (ConfigurationException e) {
+            log.error("Could not load configuration file.", e);
+            backup(key);
+            log.warn("Recreating default config");
+            write(resolvePath(key), new FileWrapper<>(determineFormat(key), key.initValue().get()));
+        }
+        return new FileWrapper<>(determineFormat(key), key.initValue().get());
+    }
+
+    /**
+     * Load a file defined in the configuration key.
+     * <p>
+     * If this file was not yet created, it will be created.
+     *
+     * @param key configuration key
+     * @param <V> type of file
+     * @return instance of file
+     */
+    protected final <V> FileWrapper<V> createAndLoad(Key<V> key) {
+        if (!exists(key)) {
+            var path = resolvePath(key);
+            log.info("Configuration file: {} does not exist. Creating.", path);
+            write(path, new FileWrapper<>(determineFormat(key), key.initValue().get()));
+        }
+        return load(key);
     }
 
     private void backup(Key<?> key) {

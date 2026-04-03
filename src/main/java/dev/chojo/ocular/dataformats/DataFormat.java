@@ -22,7 +22,7 @@ import java.util.List;
  * @param <B> the type of MapperBuilder used to configure the associated ObjectMapper
  */
 public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B>> extends Configurator<M, B> {
-    
+
     /**
      * Creates and returns a new instance of the mapper builder associated with the data format.
      * This method is used to initialize the builder for configuring the ObjectMapper for
@@ -69,7 +69,7 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
      * If the required module is not installed, a {@link MissingDataTypeInstallationException} will be thrown.
      *
      * @throws MissingDataTypeInstallationException if the required module for the data format
-     *         is not installed or available in the classpath.
+     *                                              is not installed or available in the classpath.
      */
     void assertInstalled() throws MissingDataTypeInstallationException;
 
@@ -77,7 +77,7 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
      * Provides a list of alternative type aliases for the data format.
      *
      * @return an array of strings containing aliases for the primary type of the data format.
-     *         Defaults to an empty array if no aliases are defined.
+     * Defaults to an empty array if no aliases are defined.
      */
     default String[] typeAlias() {
         return new String[0];
@@ -89,7 +89,7 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
      * of the Jackson ObjectMapper, depending on the specific requirements of the data format.
      *
      * @return a list of additional Jackson modules to be registered; returns an empty list
-     *         if no additional modules are needed
+     * if no additional modules are needed
      */
     default List<JacksonModule> additionalModules() {
         return Collections.emptyList();

@@ -28,9 +28,9 @@ import java.util.function.Consumer;
  * @param <T> The type associated with the primary configuration key.
  */
 public class ConfigurationsBuilder<T> {
-    private Path base = Path.of(".");
     private final @NotNull Key<T> main;
     private final List<DataFormat<?, ?>> formats = new LinkedList<>();
+    private Path base = Path.of(".");
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private Configurations<?> parent = null;
     private Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder = Consumers.identity();
@@ -39,7 +39,7 @@ public class ConfigurationsBuilder<T> {
     private Consumer<ObjectMapper> configureWriterMapper = Consumers.identity();
     private Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder = Consumers.identity();
     private Consumer<ObjectMapper> configureMapper = Consumers.identity();
-    private List<JacksonModule> modules = new LinkedList<>();
+    private final List<JacksonModule> modules = new LinkedList<>();
 
 
     /**

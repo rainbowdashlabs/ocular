@@ -75,6 +75,17 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
     }
 
     /**
+     * Retrieves the associated DataFormat instance used for configuring and managing
+     * the mapping of data objects. This is the DataFormat instance provided to the
+     * containing class during its construction.
+     *
+     * @return the DataFormat instance encapsulated in this class
+     */
+    public DataFormat<?, ?> format() {
+        return format;
+    }
+
+    /**
      * Configures the given mapper instance using the associated data format and configurations.
      * This method applies specific settings and customizations to the mapper to ensure it is
      * properly initialized and ready for use according to predefined criteria.
@@ -86,16 +97,5 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
         configurations.configure((MapperBuilder<ObjectMapper, ?>) mapper);
         mapper.addModules(configurations.additionalModules());
         mapper.addModules(format.additionalModules());
-    }
-
-    /**
-     * Retrieves the associated DataFormat instance used for configuring and managing
-     * the mapping of data objects. This is the DataFormat instance provided to the
-     * containing class during its construction.
-     *
-     * @return the DataFormat instance encapsulated in this class
-     */
-    public DataFormat<?, ?> format() {
-        return format;
     }
 }
