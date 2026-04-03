@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * Marks a field or method in a configuration class as overridable at runtime.
  * <p>
  * When a configuration class contains fields or methods annotated with {@code @Overwrite},
- * the annotation processor ({@link dev.chojo.ocular.processor.OcularProcessor}) will generate
+ * the annotation processor ({@link dev.chojo.ocular.processor.OcularProcessor OcularProcessor}) will generate
  * a helper class at compile time that knows how to look up override values from environment
  * variables and/or system properties.
  * <p>
@@ -39,4 +39,9 @@ public @interface Overwrite {
      * System property sources to check for an override value.
      */
     Prop[] prop() default {};
+
+    /**
+     * Description of the override.
+     */
+    String description() default "";
 }

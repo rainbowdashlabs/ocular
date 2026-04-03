@@ -11,7 +11,7 @@ import dev.chojo.ocular.override.Prop;
 
 public class AnnotationConfig {
     // prop is declared first, so it takes precedence over env
-    @Overwrite(prop = @Prop, env = @Env)
+    @Overwrite(prop = @Prop, env = @Env, description = "Some description")
     public String test;
 
     // explicit keys

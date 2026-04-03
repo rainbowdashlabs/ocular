@@ -14,7 +14,7 @@ plugins {
 
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "2.1.1"
+    publishingVersion = "2.1.2"
 }
 
 group = "dev.chojo"
@@ -118,5 +118,25 @@ tasks {
 
     compileJava {
         dependsOn(spotlessApply)
+    }
+
+    register<Copy>("copyOverrideReference") {
+        description = "Copies the generated override reference file to build/ocular/"
+        from(fileTree(layout.buildDirectory) {
+            include("**/META-INF/ocular/overrides.md")
+        })
+        eachFile {
+            relativePath = RelativePath(true, name)
+        }
+        includeEmptyDirs = false
+        into(layout.buildDirectory.dir("ocular"))
+    }
+
+    named("classes") {
+        finalizedBy("copyOverrideReference")
+    }
+
+    test {
+        finalizedBy("copyOverrideReference")
     }
 }

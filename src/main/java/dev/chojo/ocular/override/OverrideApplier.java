@@ -54,6 +54,9 @@ public final class OverrideApplier {
         // override values without the config class needing any special code.
         Class<?> clazz = object.getClass();
 
+        // Log available overrides with their descriptions
+        logAvailableOverrides(clazz);
+
         // Walk through every field in the config class (e.g. "private String host")
         // and check if the generated supplier has an override value for that field name.
         for (Field field : clazz.getDeclaredFields()) {
@@ -176,6 +179,75 @@ public final class OverrideApplier {
             }
         }
         return bestMatch;
+    }
+
+    /**
+     * Logs all available overrides for the given configuration class, including their descriptions
+     * if provided via the {@link Overwrite#description()} attribute.
+     * Takes {@link OverwritePrefix} into account for deriving default keys and forced prefixes.
+     */
+    private static void logAvailableOverrides(Class<?> clazz) {
+        String prefix = clazz.getSimpleName();
+        boolean forcePrefix = false;
+        OverwritePrefix overwritePrefix = clazz.getAnnotation(OverwritePrefix.class);
+        if (overwritePrefix != null) {
+            prefix = overwritePrefix.value();
+            forcePrefix = overwritePrefix.force();
+        }
+
+        boolean headerLogged = false;
+        for (Field field : clazz.getDeclaredFields()) {
+            Overwrite overwrite = field.getAnnotation(Overwrite.class);
+            if (overwrite != null) {
+                if (!headerLogged) {
+                    log.info("Available overrides for {}:", clazz.getSimpleName());
+                    headerLogged = true;
+                }
+                logOverwriteSources(overwrite, prefix, forcePrefix, field.getName());
+            }
+        }
+        for (Method method : clazz.getDeclaredMethods()) {
+            Overwrite overwrite = method.getAnnotation(Overwrite.class);
+            if (overwrite != null) {
+                if (!headerLogged) {
+                    log.info("Available overrides for {}:", clazz.getSimpleName());
+                    headerLogged = true;
+                }
+                logOverwriteSources(overwrite, prefix, forcePrefix, method.getName());
+            }
+        }
+    }
+
+    /**
+     * Logs the property and environment variable sources for a single {@link Overwrite} annotation,
+     * taking the prefix and force flag into account.
+     */
+    private static void logOverwriteSources(Overwrite overwrite, String prefix, boolean forcePrefix, String memberName) {
+        String desc = overwrite.description().isEmpty() ? "" : " - " + overwrite.description();
+        for (Prop prop : overwrite.prop()) {
+            String propPrefix = prefix.replace("_", ".").toLowerCase();
+            String key;
+            if (prop.value().isEmpty()) {
+                key = propPrefix + "." + memberName;
+            } else if (forcePrefix) {
+                key = propPrefix + "." + prop.value();
+            } else {
+                key = prop.value();
+            }
+            log.info("  Property: {}{}", key, desc);
+        }
+        for (Env env : overwrite.env()) {
+            String envPrefix = prefix.replace(".", "_").toUpperCase();
+            String key;
+            if (env.value().isEmpty()) {
+                key = envPrefix + "_" + memberName.toUpperCase();
+            } else if (forcePrefix) {
+                key = envPrefix + "_" + env.value();
+            } else {
+                key = env.value();
+            }
+            log.info("  Environment: {}{}", key, desc);
+        }
     }
 
     /**
