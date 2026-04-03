@@ -141,8 +141,8 @@ class ConfigurationsTest {
     @Test
     void checkPrettyJsonFormat() throws IOException {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat(true))
-            .setBase(BASE)
-            .build();
+                                                     .setBase(BASE)
+                                                     .build();
 
         conf.main();
         conf.save();
@@ -152,25 +152,25 @@ class ConfigurationsTest {
 
         // The reason we use .lines() here is because of OS specific differences in line separators (LF & CRLF) 
         Assertions.assertLinesMatch("""
-            {
-              "name" : "Lilly",
-              "age" : 20
-            }
-            """.trim().lines(), json.lines());
+                {
+                  "name" : "Lilly",
+                  "age" : 20
+                }
+                """.trim().lines(), json.lines());
     }
 
     @Test
     void checkNonPrettyJsonFormat() throws IOException {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat(false))
-            .setBase(BASE)
-            .build();
+                                                     .setBase(BASE)
+                                                     .build();
 
         conf.main();
         conf.save();
 
         Assertions.assertTrue(BASE.resolve(JSON.path()).toFile().exists());
         String json = Files.readString(BASE.resolve(JSON.path()));
-        
+
         Assertions.assertEquals("{\"name\":\"Lilly\",\"age\":20}", json);
     }
 
@@ -193,8 +193,8 @@ class ConfigurationsTest {
     void exampleJacksonBukkit() {
         Key<MyClass> mainConfig = Key.builder(Path.of("config.yml"), MyClass::new).build();
         Configurations.builder(mainConfig, new YamlDataFormat())
-                .withClassLoader(this.getClass().getClassLoader()) // For minecraft its important to pass the classloader
-                .addModule(new JacksonPaper())
-                .build();
+                      .withClassLoader(this.getClass().getClassLoader()) // For minecraft its important to pass the classloader
+                      .addModule(new JacksonPaper())
+                      .build();
     }
 }
