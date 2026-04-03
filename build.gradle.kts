@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     compileOnly("org.slf4j", "slf4j-api", "2.0.17")
-    compileOnlyApi("org.jetbrains", "annotations", "26.0.2")
+    compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
     api("tools.jackson.core", "jackson-databind") {
         version {
             require("3.0.0")
@@ -41,7 +41,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.0.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.1")
-    testImplementation("org.jetbrains", "annotations", "26.0.2")
+    testImplementation("org.jetbrains", "annotations", "26.1.0")
     testImplementation("org.slf4j", "slf4j-api", "2.0.17")
     testImplementation("org.slf4j", "slf4j-simple", "2.0.17")
     testImplementation("tools.jackson.dataformat", "jackson-dataformat-yaml")
