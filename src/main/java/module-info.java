@@ -1,12 +1,12 @@
-module ocular {
+module dev.chojo.ocular {
     requires com.fasterxml.jackson.annotation;
     requires java.compiler;
     requires org.jetbrains.annotations;
     requires org.slf4j;
     requires tools.jackson.core;
     requires tools.jackson.databind;
-    requires tools.jackson.dataformat.toml;
-    requires tools.jackson.dataformat.yaml;
+    requires static tools.jackson.dataformat.toml;
+    requires static tools.jackson.dataformat.yaml;
 
     exports dev.chojo.ocular;
     exports dev.chojo.ocular.components;

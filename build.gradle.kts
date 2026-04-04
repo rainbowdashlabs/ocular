@@ -10,11 +10,9 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
-// OpenRewrite configuration will be passed via command line properties
-
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "2.1.3"
+    publishingVersion = "2.1.4"
 }
 
 group = "dev.chojo"

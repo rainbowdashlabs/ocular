@@ -157,16 +157,6 @@ public class OcularProcessor extends AbstractProcessor {
     }
 
     /**
-     * Generates the {@code _OcularOverride} Java source file for a single config class.
-     * <p>
-     * The generated class implements {@link dev.chojo.ocular.override.ValueSupplier} and contains:
-     * <ul>
-     *   <li>A {@code Map<String, String>} that maps field names to their override values.</li>
-     *   <li>A constructor that reads env vars / system properties and populates the map.</li>
-     *   <li>A {@code getValue()} method that looks up a field name in the map.</li>
-     * </ul>
-     */
-    /**
      * Holds information about a single override for documentation and logging purposes.
      */
     private record OverrideInfo(String fieldName, String description, List<String> sources) {
@@ -200,6 +190,16 @@ public class OcularProcessor extends AbstractProcessor {
         }
     }
 
+    /**
+     * Generates the {@code _OcularOverride} Java source file for a single config class.
+     * <p>
+     * The generated class implements {@link dev.chojo.ocular.override.ValueSupplier} and contains:
+     * <ul>
+     *   <li>A {@code Map<String, String>} that maps field names to their override values.</li>
+     *   <li>A constructor that reads env vars / system properties and populates the map.</li>
+     *   <li>A {@code getValue()} method that looks up a field name in the map.</li>
+     * </ul>
+     */
     private List<OverrideInfo> generateOverrideProvider(TypeElement typeElement, List<Element> elements) throws IOException {
         // Extract the package (e.g. "com.example") so we can put the generated file in the same package
         String packageName = ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString();
@@ -296,10 +296,10 @@ public class OcularProcessor extends AbstractProcessor {
         // The first source that provides a non-null value wins.
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
                 overwriteMirror.getElementValues().entrySet()) {
-            // Skip the description value
-            if (entry.getValue().getValue().getClass() == String.class) continue;
             // attrName is either "prop" or "env" — the attribute name from @Overwrite
             String attrName = entry.getKey().getSimpleName().toString();
+            // Skip the description value
+            if (entry.getValue().getValue().getClass() == String.class) continue;
             // The value is an array of nested annotations (e.g. the @Prop[] or @Env[] array)
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> values = (List<? extends AnnotationValue>) entry.getValue().getValue();
