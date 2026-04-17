@@ -7,9 +7,16 @@ package dev.chojo.ocular.override;
 
 import org.slf4j.Logger;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -68,7 +75,7 @@ public final class OverrideApplier {
                     field.setAccessible(true);
                     // The override value comes as a String (from env / prop), but the field
                     // might be an int, boolean, etc. convertValue handles that conversion.
-                    Object value = convertValue(field.getType(), override.get());
+                    Object value = convertValue(field.getType(), field.getGenericType(), override.get());
                     if (value != null) {
                         // Actually write the override value into the field on the config object
                         field.set(object, value);
@@ -91,7 +98,7 @@ public final class OverrideApplier {
                 try {
                     method.setAccessible(true);
                     // Convert the string value to match the method's parameter type
-                    Object value = convertValue(method.getParameterTypes()[0], override.get());
+                    Object value = convertValue(method.getParameterTypes()[0], method.getGenericParameterTypes()[0], override.get());
                     if (value != null) {
                         // Call the method on the config object, passing the override value
                         method.invoke(object, value);
@@ -119,7 +126,7 @@ public final class OverrideApplier {
                 if (targetField != null) {
                     try {
                         targetField.setAccessible(true);
-                        Object value = convertValue(targetField.getType(), override.get());
+                        Object value = convertValue(targetField.getType(), targetField.getGenericType(), override.get());
                         if (value != null) {
                             targetField.set(object, value);
                         }
@@ -253,9 +260,11 @@ public final class OverrideApplier {
     /**
      * Converts a string override value to the target field/parameter type.
      * Supports all Java primitive types and their boxed equivalents, plus String.
+     * Also supports arrays, {@link List} and {@link Set} of String, where the input
+     * value is a comma-separated string.
      * Returns null for unsupported types (with a warning logged).
      */
-    private static Object convertValue(Class<?> type, Object value) {
+    private static Object convertValue(Class<?> type, Type genericType, Object value) {
         if (value == null) return null;
         // Environment variables and system properties are always strings, so we need to parse
         // them into the correct Java type. For example, the string "8080" becomes the int 8080.
@@ -269,6 +278,44 @@ public final class OverrideApplier {
         if (type == float.class || type == Float.class) return Float.parseFloat(stringValue);
         if (type == short.class || type == Short.class) return Short.parseShort(stringValue);
         if (type == byte.class || type == Byte.class) return Byte.parseByte(stringValue);
+
+        // Arrays, Lists and Sets are provided as comma-separated strings
+        if (type.isArray()) {
+            Class<?> componentType = type.getComponentType();
+            String[] parts = stringValue.split(",", -1);
+            Object array = Array.newInstance(componentType, parts.length);
+            for (int i = 0; i < parts.length; i++) {
+                Object element = convertValue(componentType, componentType, parts[i].trim());
+                Array.set(array, i, element);
+            }
+            return array;
+        }
+
+        // Resolve the element type from the generic type parameter (e.g. List<Integer> -> Integer)
+        Class<?> elementType = String.class;
+        if (genericType instanceof ParameterizedType parameterized) {
+            Type[] typeArgs = parameterized.getActualTypeArguments();
+            if (typeArgs.length == 1 && typeArgs[0] instanceof Class<?> cls) {
+                elementType = cls;
+            }
+        }
+
+        if (type == List.class || type == ArrayList.class) {
+            String[] parts = stringValue.split(",", -1);
+            List<Object> list = new ArrayList<>();
+            for (String part : parts) {
+                list.add(convertValue(elementType, elementType, part.trim()));
+            }
+            return list;
+        }
+        if (type == Set.class || type == HashSet.class) {
+            String[] parts = stringValue.split(",", -1);
+            Set<Object> set = new HashSet<>();
+            for (String part : parts) {
+                set.add(convertValue(elementType, elementType, part.trim()));
+            }
+            return set;
+        }
 
         log.warn("Unsupported override type: {}", type.getName());
         return null;
