@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -382,6 +383,13 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * this method silently does nothing.
      */
     private <V> void applyOverrides(V object, Class<V> clazz) {
+        applyOverridesRecursive(object, clazz, new HashSet<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> void applyOverridesRecursive(V object, Class<V> clazz, Set<Object> visited) {
+        if (object == null || !visited.add(object)) return;
+
         String baseName = clazz.getName();
         // Inner classes use '$' in Class.getName() (e.g. "Outer$Inner") but the generated class
         // uses '_' instead (e.g. "Outer_Inner_OcularOverride"), so we try both naming conventions.
@@ -393,12 +401,35 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                 ValueSupplier supplier = (ValueSupplier) overrideClass.getDeclaredConstructor().newInstance();
                 // Apply the collected override values to the config object's fields/methods
                 OverrideApplier.applyOverrides(object, supplier);
-                return;
+                break;
             } catch (ClassNotFoundException ignored) {
                 // No generated class for this naming variant — try the next one
             } catch (ReflectiveOperationException e) {
                 log.warn("Could not apply overrides for class {}: {}", clazz.getName(), e.getMessage());
-                return;
+                break;
+            }
+        }
+
+        // Recurse into nested object fields that might have their own @Overwrite annotations
+        for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
+            Class<?> fieldType = field.getType();
+            // Skip primitives, boxed primitives, strings, enums, arrays, and common collection/map types
+            if (fieldType.isPrimitive() || fieldType.isArray() || fieldType.isEnum()
+                    || fieldType == String.class
+                    || Number.class.isAssignableFrom(fieldType)
+                    || fieldType == Boolean.class || fieldType == Character.class
+                    || java.util.Collection.class.isAssignableFrom(fieldType)
+                    || java.util.Map.class.isAssignableFrom(fieldType)) {
+                continue;
+            }
+            try {
+                field.setAccessible(true);
+                Object nested = field.get(object);
+                if (nested != null) {
+                    applyOverridesRecursive(nested, (Class<Object>) nested.getClass(), visited);
+                }
+            } catch (IllegalAccessException e) {
+                log.warn("Could not access field {} for nested override application: {}", field.getName(), e.getMessage());
             }
         }
     }
