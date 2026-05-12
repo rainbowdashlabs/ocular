@@ -24,12 +24,12 @@ dependencyResolutionManagement {
             plugin("spotless", "com.diffplug.spotless").version("8.4.0")
             plugin("shadow", "com.github.johnrengelman.shadow").version("8.1.1")
 
-            version("slf4j", "2.0.17")
+            version("slf4j", "2.0.18")
             library("slf4j-api", "org.slf4j", "slf4j-api").versionRef("slf4j")
         }
 
         create("testlibs") {
-            version("slf4j", "2.0.17")
+            version("slf4j", "2.0.18")
             library("slf4j-noop", "org.slf4j", "slf4j-nop").versionRef("slf4j")
             library("slf4j-simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
         }

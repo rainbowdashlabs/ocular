@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j", "slf4j-api", "2.0.17")
+    compileOnly("org.slf4j", "slf4j-api", "2.0.18")
     compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
     api("tools.jackson.core", "jackson-databind") {
         version {
@@ -42,8 +42,8 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.0.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
     testImplementation("org.jetbrains", "annotations", "26.1.0")
-    testImplementation("org.slf4j", "slf4j-api", "2.0.17")
-    testImplementation("org.slf4j", "slf4j-simple", "2.0.17")
+    testImplementation("org.slf4j", "slf4j-api", "2.0.18")
+    testImplementation("org.slf4j", "slf4j-simple", "2.0.18")
     testImplementation("tools.jackson.dataformat", "jackson-dataformat-yaml")
     testImplementation("tools.jackson.dataformat", "jackson-dataformat-toml")
     testImplementation("de.eldoria.jacksonbukkit", "paper", "2.0.0")
