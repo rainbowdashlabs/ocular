@@ -6,7 +6,7 @@ plugins {
     `java-library`
     id("de.chojo.publishdata") version "1.4.0"
     alias(libs.plugins.spotless)
-    id("com.vanniktech.maven.publish") version "0.36.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
 }
 
 // OpenRewrite configuration will be passed via command line properties
