@@ -21,7 +21,7 @@ dependencyResolutionManagement {
         create("libs") {
 
             // plugins
-            plugin("spotless", "com.diffplug.spotless").version("8.8.0")
+            plugin("spotless", "com.diffplug.spotless").version("8.9.0")
             plugin("shadow", "com.github.johnrengelman.shadow").version("8.1.1")
 
             version("slf4j", "2.0.18")
