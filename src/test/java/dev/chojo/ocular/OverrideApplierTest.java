@@ -170,6 +170,92 @@ class OverrideApplierTest {
         assertEquals(Set.of(1, 2, 3), target.ids);
     }
 
+    @Test
+    void enumOverride() {
+        EnumTarget target = new EnumTarget();
+        MapSupplier supplier = new MapSupplier(Map.of("level", "WARN"));
+
+        OverrideApplier.applyOverrides(target, supplier);
+
+        assertEquals(Level.WARN, target.level);
+    }
+
+    @Test
+    void enumOverrideIgnoresCase() {
+        EnumTarget target = new EnumTarget();
+        MapSupplier supplier = new MapSupplier(Map.of("level", "error"));
+
+        OverrideApplier.applyOverrides(target, supplier);
+
+        assertEquals(Level.ERROR, target.level);
+    }
+
+    @Test
+    void enumOverrideViaMethod() {
+        EnumTarget target = new EnumTarget();
+        MapSupplier supplier = new MapSupplier(Map.of("mode", "Strict"));
+
+        OverrideApplier.applyOverrides(target, supplier);
+
+        assertEquals(Mode.STRICT, target.current);
+    }
+
+    @Test
+    void unknownEnumConstantKeepsValue() {
+        EnumTarget target = new EnumTarget();
+        MapSupplier supplier = new MapSupplier(Map.of("level", "verbose"));
+
+        OverrideApplier.applyOverrides(target, supplier);
+
+        assertEquals(Level.INFO, target.level);
+    }
+
+    @Test
+    void enumCollectionOverride() {
+        EnumTarget target = new EnumTarget();
+        MapSupplier supplier = new MapSupplier(Map.of(
+                "levelArray", "info,WARN",
+                "levelList", "ERROR,info",
+                "levelSet", "warn,error"
+        ));
+
+        OverrideApplier.applyOverrides(target, supplier);
+
+        assertArrayEquals(new Level[]{Level.INFO, Level.WARN}, target.levelArray);
+        assertEquals(List.of(Level.ERROR, Level.INFO), target.levelList);
+        assertEquals(Set.of(Level.WARN, Level.ERROR), target.levelSet);
+    }
+
+    @Test
+    void unknownEnumConstantInCollectionKeepsValue() {
+        EnumTarget target = new EnumTarget();
+        MapSupplier supplier = new MapSupplier(Map.of("levelList", "INFO,verbose"));
+
+        OverrideApplier.applyOverrides(target, supplier);
+
+        assertEquals(List.of(), target.levelList);
+    }
+
+    enum Level {
+        INFO, WARN, ERROR
+    }
+
+    enum Mode {
+        LENIENT, STRICT
+    }
+
+    static class EnumTarget {
+        Level level = Level.INFO;
+        Level[] levelArray = {};
+        List<Level> levelList = List.of();
+        Set<Level> levelSet = Set.of();
+        private Mode current = Mode.LENIENT;
+
+        public void mode(Mode mode) {
+            this.current = mode;
+        }
+    }
+
     static class CollectionTarget {
         String[] tags = {};
         int[] numbers = {};

@@ -82,7 +82,7 @@ public final class OverrideApplier {
                     }
                 } catch (IllegalAccessException e) {
                     log.warn("Could not set override for field {}: {}", field.getName(), e.getMessage());
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     log.warn("Could not convert override value for field {}: {}", field.getName(), e.getMessage());
                 }
             }
@@ -105,7 +105,7 @@ public final class OverrideApplier {
                     }
                 } catch (IllegalAccessException e) {
                     log.warn("Could not invoke override for method {}: {}", method.getName(), e.getMessage());
-                } catch (NumberFormatException e) {
+                } catch (IllegalArgumentException e) {
                     log.warn("Could not convert override value for method {}: {}", method.getName(), e.getMessage());
                 } catch (java.lang.reflect.InvocationTargetException e) {
                     log.warn("Override method {} threw an exception: {}", method.getName(), e.getCause().getMessage());
@@ -132,7 +132,7 @@ public final class OverrideApplier {
                         }
                     } catch (IllegalAccessException e) {
                         log.warn("Could not set override for getter {}: {}", method.getName(), e.getMessage());
-                    } catch (NumberFormatException e) {
+                    } catch (IllegalArgumentException e) {
                         log.warn("Could not convert override value for getter {}: {}", method.getName(), e.getMessage());
                     }
                 } else {
@@ -259,8 +259,8 @@ public final class OverrideApplier {
 
     /**
      * Converts a string override value to the target field/parameter type.
-     * Supports all Java primitive types and their boxed equivalents, plus String.
-     * Also supports arrays, {@link List} and {@link Set} of String, where the input
+     * Supports all Java primitive types and their boxed equivalents, String and enums.
+     * Also supports arrays, {@link List} and {@link Set} of those types, where the input
      * value is a comma-separated string.
      * Returns null for unsupported types (with a warning logged).
      */
@@ -278,6 +278,7 @@ public final class OverrideApplier {
         if (type == float.class || type == Float.class) return Float.parseFloat(stringValue);
         if (type == short.class || type == Short.class) return Short.parseShort(stringValue);
         if (type == byte.class || type == Byte.class) return Byte.parseByte(stringValue);
+        if (type.isEnum()) return parseEnum(type, stringValue);
 
         // Arrays, Lists and Sets are provided as comma-separated strings
         if (type.isArray()) {
@@ -319,5 +320,22 @@ public final class OverrideApplier {
 
         log.warn("Unsupported override type: {}", type.getName());
         return null;
+    }
+
+    /**
+     * Resolves an enum constant by name. An exact match is preferred; otherwise the name is matched
+     * case-insensitively, so {@code debug} resolves to {@code DEBUG}.
+     *
+     * @throws IllegalArgumentException if no constant of the enum has the given name
+     */
+    private static Object parseEnum(Class<?> type, String name) {
+        Object[] constants = type.getEnumConstants();
+        for (Object constant : constants) {
+            if (((Enum<?>) constant).name().equals(name)) return constant;
+        }
+        for (Object constant : constants) {
+            if (((Enum<?>) constant).name().equalsIgnoreCase(name)) return constant;
+        }
+        throw new IllegalArgumentException("No constant " + name + " in enum " + type.getName());
     }
 }

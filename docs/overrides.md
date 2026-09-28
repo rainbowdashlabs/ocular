@@ -142,6 +142,10 @@ The override system supports the following field types. Values from environment 
 - `boolean` / `Boolean`
 - `short` / `Short`
 - `byte` / `Byte`
+- Enums — the value is matched against the constant names, exact match first, then ignoring case (`warn` resolves to `WARN`)
+- Arrays, `List` and `Set` of any of the above, given as a comma-separated value (e.g. `INFO,WARN`)
+
+If a value cannot be converted (an invalid number or an unknown enum constant), a warning is logged and the value from the configuration file is kept.
 
 ## What Happens Under the Hood
 
