@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "debug": true,
+  "verbose": false,
+  "name": "from-config",
+  "port": 9090,
+  "ratio": 1.5
+}
