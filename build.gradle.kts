@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 
 plugins {
     java
@@ -9,11 +10,9 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.37.0"
 }
 
-// OpenRewrite configuration will be passed via command line properties
-
 publishData {
     useEldoNexusRepos(false)
-    publishingVersion = "2.0.0"
+    publishingVersion = "2.2.1"
 }
 
 group = "dev.chojo"
@@ -28,6 +27,7 @@ repositories {
 dependencies {
     compileOnly("org.slf4j", "slf4j-api", "2.0.20")
     compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
+    annotationProcessor("org.jetbrains:annotations:26.1.0") // to avoid warnings if any
     api("tools.jackson.core", "jackson-databind") {
         version {
             require("3.0.0")
@@ -64,6 +64,7 @@ java {
 
 mavenPublishing{
     signAllPublications()
+    publishToMavenCentral()
 
     coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
 
@@ -99,7 +100,7 @@ mavenPublishing{
 
     configure(JavaLibrary(
         javadocJar = JavadocJar.Javadoc(),
-        sourcesJar = true
+        sourcesJar = SourcesJar.Sources()
     ))
 }
 
@@ -114,5 +115,25 @@ tasks {
 
     compileJava {
         dependsOn(spotlessApply)
+    }
+
+    register<Copy>("copyOverrideReference") {
+        description = "Copies the generated override reference file to build/ocular/"
+        from(fileTree(layout.buildDirectory) {
+            include("**/META-INF/ocular/overrides.md")
+        })
+        eachFile {
+            relativePath = RelativePath(true, name)
+        }
+        includeEmptyDirs = false
+        into(layout.buildDirectory.dir("ocular"))
+    }
+
+    named("classes") {
+        finalizedBy("copyOverrideReference")
+    }
+
+    test {
+        finalizedBy("copyOverrideReference")
     }
 }

@@ -5,8 +5,8 @@
  */
 package dev.chojo.ocular.locks;
 
-import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.exceptions.ParallelAccessException;
+import dev.chojo.ocular.key.Key;
 
 import java.util.HashSet;
 import java.util.Set;

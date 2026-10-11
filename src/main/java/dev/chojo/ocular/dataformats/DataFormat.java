@@ -5,11 +5,11 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
 import dev.chojo.ocular.key.Key;
 import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.util.Collections;
 import java.util.List;

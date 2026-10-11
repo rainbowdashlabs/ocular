@@ -5,11 +5,11 @@
  */
 package dev.chojo.ocular;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.dataformats.DataFormat;
 import dev.chojo.ocular.key.Key;
 import org.jetbrains.annotations.NotNull;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.nio.file.Path;
 import java.util.List;

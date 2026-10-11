@@ -1,0 +1,8 @@
+{
+  "test": "original-test",
+  "testPrecise": "original-precise",
+  "envFirst": "original-envFirst",
+  "multiSys": "original-multiSys",
+  "multiEnv": "original-multiEnv",
+  "mixedMultiple": "original-mixed"
+}

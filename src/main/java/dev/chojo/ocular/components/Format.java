@@ -5,10 +5,10 @@
  */
 package dev.chojo.ocular.components;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.cfg.MapperBuilder;
 import dev.chojo.ocular.Configurations;
 import dev.chojo.ocular.dataformats.DataFormat;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 /**
  * The Format class encapsulates the configuration and initialization logic for creating

@@ -5,8 +5,8 @@
  */
 package dev.chojo.ocular.dataformats;
 
-import tools.jackson.dataformat.yaml.YAMLMapper;
 import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder> {
@@ -36,7 +36,7 @@ public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder
         try {
             Class.forName(YAMLMapper.class.getName());
         } catch (ClassNotFoundException e) {
-            throw new MissingDataTypeInstallationException(type(), "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml");
+            throw new MissingDataTypeInstallationException(type(), "tools.jackson.dataformat:jackson-dataformat-yaml");
         }
     }
 }
