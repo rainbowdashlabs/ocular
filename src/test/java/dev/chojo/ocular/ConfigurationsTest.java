@@ -10,6 +10,7 @@ import dev.chojo.classes.MyClass;
 import dev.chojo.ocular.dataformats.JsonDataFormat;
 import dev.chojo.ocular.dataformats.TomlDataFormat;
 import dev.chojo.ocular.dataformats.YamlDataFormat;
+import dev.chojo.ocular.exceptions.ConfigurationException;
 import dev.chojo.ocular.exceptions.UnknownFormatException;
 import dev.chojo.ocular.key.Key;
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +50,33 @@ class ConfigurationsTest {
                       .forEachOrdered(File::delete);
             }
         }
+    }
+
+    @Test
+    void strictKeysLeaveUnreadableFilesUntouched() throws IOException {
+        Key<MyClass> strict = Key.builder(Path.of("strict.json"), () -> new MyClass("Lilly", 20)).strict().build();
+        Files.writeString(BASE.resolve("strict.json"), "{ not json");
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
+
+        Assertions.assertThrows(ConfigurationException.class, () -> conf.secondary(strict));
+        Assertions.assertEquals("{ not json", Files.readString(BASE.resolve("strict.json")));
+        try (var files = Files.list(BASE)) {
+            Assertions.assertTrue(files.noneMatch(file -> file.getFileName().toString().startsWith("backup_")));
+        }
+    }
+
+    @Test
+    void lenientKeysReplaceUnreadableFiles() throws IOException {
+        Key<MyClass> lenient = Key.builder(Path.of("lenient.json"), () -> new MyClass("Lilly", 20)).build();
+        Files.writeString(BASE.resolve("lenient.json"), "{ not json");
+        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
+                                                     .setBase(BASE)
+                                                     .build();
+
+        Assertions.assertNotNull(conf.secondary(lenient));
+        Assertions.assertNotEquals("{ not json", Files.readString(BASE.resolve("lenient.json")));
     }
 
     @Test

@@ -25,6 +25,16 @@ The builder allows to define a more humanreadable name for the file as well.
 
     The default value will be recreated again and the default value is not cached. It will also be created once directly to determine the class of the key.
 
+### Strict keys
+
+A file that cannot be read is backed up and replaced with the default value. For files holding data users wrote, that silently resets their work. Mark such keys as strict:
+
+```java
+Key.builder(Path.of("mobs.yml"), MobRegistry::new).strict().build();
+```
+
+Loading a strict key that cannot be read throws a `ConfigurationException` and leaves the file untouched.
+
 ## Data Types
 
 Jackson supports a lot of different data formats. Ocular does not use any default data format on its own. It however provides predefined formats for `json`, `yaml` and `toml`.

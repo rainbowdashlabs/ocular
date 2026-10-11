@@ -20,9 +20,23 @@ import java.util.function.Supplier;
  * @param path        path of file with file ending. Path might be relative to {@link Configurations#base()}
  * @param configClazz class representing the file
  * @param initValue   the initial value when the file does not yet exist.
+ * @param strict      whether a file that cannot be read fails loading instead of being backed up and replaced by the
+ *                    initial value; use it for files holding user data that must never be reset silently
  * @param <T>         type of file class
  */
-public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> initValue) {
+public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> initValue, boolean strict) {
+
+    /**
+     * Creates a key that replaces unreadable files with the initial value after backing them up.
+     *
+     * @param name        name of file
+     * @param path        path of file with file ending
+     * @param configClazz class representing the file
+     * @param initValue   the initial value when the file does not yet exist
+     */
+    public Key(String name, Path path, Class<T> configClazz, Supplier<T> initValue) {
+        this(name, path, configClazz, initValue, false);
+    }
 
     public static <T> KeyBuilder<T> builder(Path path, Supplier<T> supplier) {
         return new KeyBuilder<>(path, supplier);

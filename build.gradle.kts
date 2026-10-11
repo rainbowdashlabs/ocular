@@ -7,7 +7,7 @@ plugins {
     `java-library`
     id("de.chojo.publishdata") version "1.4.0"
     alias(libs.plugins.spotless)
-    id("com.vanniktech.maven.publish") version "0.36.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
 }
 
 publishData {
@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j", "slf4j-api", "2.0.17")
+    compileOnly("org.slf4j", "slf4j-api", "2.0.20")
     compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
     annotationProcessor("org.jetbrains:annotations:26.1.0") // to avoid warnings if any
     api("tools.jackson.core", "jackson-databind") {
@@ -37,14 +37,14 @@ dependencies {
     compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
     compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.0.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:6.1.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.1.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.1.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
     testAnnotationProcessor(sourceSets.main.get().output)
     testImplementation("org.jetbrains", "annotations", "26.1.0")
-    testImplementation("org.slf4j", "slf4j-api", "2.0.17")
-    testImplementation("org.slf4j", "slf4j-simple", "2.0.17")
+    testImplementation("org.slf4j", "slf4j-api", "2.0.20")
+    testImplementation("org.slf4j", "slf4j-simple", "2.0.20")
     testImplementation("tools.jackson.dataformat", "jackson-dataformat-yaml")
     testImplementation("tools.jackson.dataformat", "jackson-dataformat-toml")
     testImplementation("de.eldoria.jacksonbukkit", "paper", "2.0.0")

@@ -19,6 +19,7 @@ public class KeyBuilder<T> {
     private final Class<T> configClazz;
     private final Supplier<T> initValue;
     private String name;
+    private boolean strict;
 
     /**
      * Constructs a new KeyBuilder instance with the specified path and initial value supplier.
@@ -45,7 +46,16 @@ public class KeyBuilder<T> {
         return this;
     }
 
+    /**
+     * Makes loading fail when the file cannot be read, leaving the file untouched, instead of backing it up and
+     * replacing it with the initial value.
+     */
+    public KeyBuilder<T> strict() {
+        this.strict = true;
+        return this;
+    }
+
     public Key<T> build() {
-        return new Key<>(name, path, configClazz, initValue);
+        return new Key<>(name, path, configClazz, initValue, strict);
     }
 }
