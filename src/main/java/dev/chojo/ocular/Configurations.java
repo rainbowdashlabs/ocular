@@ -293,6 +293,9 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * <p>
      * Will fail if the file is not present.
      * <p>
+     * A file that cannot be read is backed up and replaced by the initial value, unless the key is
+     * {@link Key#strict() strict}: then the exception is rethrown and the file stays as it is.
+     * <p>
      * Use {@link #createAndLoad(Key)} if you want the file to be created.
      *
      * @param key configuration key
@@ -304,6 +307,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         try {
             return read(determineFormat(key), resolvePath(key), key.configClazz());
         } catch (ConfigurationException e) {
+            if (key.strict()) throw e;
             log.error("Could not load configuration file.", e);
             backup(key);
             log.warn("Recreating default config");
