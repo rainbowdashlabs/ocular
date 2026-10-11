@@ -41,6 +41,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.1.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
+    testAnnotationProcessor(sourceSets.main.get().output)
     testImplementation("org.jetbrains", "annotations", "26.1.0")
     testImplementation("org.slf4j", "slf4j-api", "2.0.20")
     testImplementation("org.slf4j", "slf4j-simple", "2.0.20")
