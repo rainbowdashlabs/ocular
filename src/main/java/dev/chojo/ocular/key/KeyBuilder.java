@@ -20,6 +20,7 @@ public class KeyBuilder<T> {
     private final Supplier<T> initValue;
     private String name;
     private boolean strict;
+    private String rootPackage;
 
     /**
      * Constructs a new KeyBuilder instance with the specified path and initial value supplier.
@@ -33,6 +34,7 @@ public class KeyBuilder<T> {
         this.path = path;
         this.configClazz = (Class<T>) initValue.get().getClass();
         this.initValue = initValue;
+        this.rootPackage = configClazz.getPackageName();
     }
 
 
@@ -55,7 +57,21 @@ public class KeyBuilder<T> {
         return this;
     }
 
+    /**
+     * Sets the package that holds the configuration classes. Overrides are applied to nested objects only while their
+     * class lies in this package or one of its sub packages.
+     * <p>
+     * Defaults to the package of the config class. Widen it when nested configuration classes live in a sibling
+     * package.
+     *
+     * @param rootPackage the package name, for example {@code com.example.config}
+     */
+    public KeyBuilder<T> rootPackage(String rootPackage) {
+        this.rootPackage = rootPackage;
+        return this;
+    }
+
     public Key<T> build() {
-        return new Key<>(name, path, configClazz, initValue, strict);
+        return new Key<>(name, path, configClazz, initValue, strict, rootPackage);
     }
 }

@@ -30,13 +30,18 @@ import tools.jackson.databind.introspect.VisibilityChecker;
 import tools.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -306,7 +311,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     protected final <V> FileWrapper<V> load(Key<V> key) {
         if (!exists(key)) return null;
         try {
-            return read(determineFormat(key), resolvePath(key), key.configClazz());
+            return read(determineFormat(key), resolvePath(key), key);
         } catch (ConfigurationException e) {
             if (key.strict()) throw e;
             log.error("Could not load configuration file.", e);
@@ -361,13 +366,13 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         }
     }
 
-    private <V> FileWrapper<V> read(Format<?, ?> format, Path path, Class<V> clazz) {
+    private <V> FileWrapper<V> read(Format<?, ?> format, Path path, Key<V> key) {
         try {
-            V v = format.reader().readValue(path.toFile(), clazz);
+            V v = format.reader().readValue(path.toFile(), key.configClazz());
             if (v instanceof ConfigSubscriber sub) {
                 sub.postRead(this);
             }
-            applyOverrides(v, clazz);
+            applyOverrides(v, key);
             return new FileWrapper<>(format, v);
         } catch (JacksonException e) {
             log.error("Could not read configuration file from {}", path, e);
@@ -385,13 +390,15 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * <p>
      * If no generated class exists (i.e. the config class has no {@code @Overwrite} annotations),
      * this method silently does nothing.
+     * <p>
+     * Nested objects are searched as well, as long as their class lies in the {@link Key#rootPackage() root package}
+     * of the key. Static fields are skipped.
      */
-    private <V> void applyOverrides(V object, Class<V> clazz) {
-        applyOverridesRecursive(object, clazz, new HashSet<>());
+    private <V> void applyOverrides(V object, Key<V> key) {
+        applyOverridesRecursive(object, key.configClazz(), key, Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
-    @SuppressWarnings("unchecked")
-    private <V> void applyOverridesRecursive(V object, Class<V> clazz, Set<Object> visited) {
+    private void applyOverridesRecursive(Object object, Class<?> clazz, Key<?> key, Set<Object> visited) {
         if (object == null || !visited.add(object)) return;
 
         String baseName = clazz.getName();
@@ -414,28 +421,27 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             }
         }
 
-        // Recurse into nested object fields that might have their own @Overwrite annotations
-        for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
-            Class<?> fieldType = field.getType();
-            // Skip primitives, boxed primitives, strings, enums, arrays, and common collection/map types
-            if (fieldType.isPrimitive() || fieldType.isArray() || fieldType.isEnum()
-                    || fieldType == String.class
-                    || Number.class.isAssignableFrom(fieldType)
-                    || fieldType == Boolean.class || fieldType == Character.class
-                    || java.util.Collection.class.isAssignableFrom(fieldType)
-                    || java.util.Map.class.isAssignableFrom(fieldType)) {
-                continue;
-            }
+        for (Field field : clazz.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers()) || isLeafType(field.getType())) continue;
             try {
                 field.setAccessible(true);
                 Object nested = field.get(object);
-                if (nested != null) {
-                    applyOverridesRecursive(nested, (Class<Object>) nested.getClass(), visited);
+                if (nested != null && key.isInRootPackage(nested.getClass())) {
+                    applyOverridesRecursive(nested, nested.getClass(), key, visited);
                 }
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | InaccessibleObjectException e) {
                 log.warn("Could not access field {} for nested override application: {}", field.getName(), e.getMessage());
             }
         }
+    }
+
+    private static boolean isLeafType(Class<?> type) {
+        return type.isPrimitive() || type.isArray() || type.isEnum()
+               || type == String.class
+               || Number.class.isAssignableFrom(type)
+               || type == Boolean.class || type == Character.class
+               || Collection.class.isAssignableFrom(type)
+               || Map.class.isAssignableFrom(type);
     }
 
     private Path resolvePath(Key<?> key) {

@@ -147,6 +147,18 @@ The override system supports the following field types. Values from environment 
 
 If a value cannot be converted (an invalid number or an unknown enum constant), a warning is logged and the value from the configuration file is kept.
 
+## Nested Configuration Objects
+
+Overrides also apply to fields of nested objects, such as a `database` section inside the main configuration class. Ocular only descends into objects whose class lies in the root package of the key: by default the package of the configuration class and its sub packages. Objects of other classes, such as JDK types, are left alone, and static fields are never visited.
+
+If your nested configuration classes live in a sibling package, widen the root package on the key:
+
+```java
+Key.builder(Path.of("config.yml"), AppConfig::new)
+   .rootPackage("com.example")
+   .build();
+```
+
 ## What Happens Under the Hood
 
 When you compile your project, the annotation processor:
