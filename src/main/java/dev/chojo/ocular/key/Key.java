@@ -22,9 +22,26 @@ import java.util.function.Supplier;
  * @param initValue   the initial value when the file does not yet exist.
  * @param strict      whether a file that cannot be read fails loading instead of being backed up and replaced by the
  *                    initial value; use it for files holding user data that must never be reset silently
+ * @param rootPackage package that holds the configuration classes. Overrides are applied to nested objects only while
+ *                    their class lies in this package or one of its sub packages. Defaults to the package of
+ *                    {@code configClazz}.
  * @param <T>         type of file class
  */
-public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> initValue, boolean strict) {
+public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> initValue, boolean strict,
+                     String rootPackage) {
+
+    /**
+     * Creates a key whose root package is the package of the config class.
+     *
+     * @param name        name of file
+     * @param path        path of file with file ending
+     * @param configClazz class representing the file
+     * @param initValue   the initial value when the file does not yet exist
+     * @param strict      whether a file that cannot be read fails loading instead of being reset
+     */
+    public Key(String name, Path path, Class<T> configClazz, Supplier<T> initValue, boolean strict) {
+        this(name, path, configClazz, initValue, strict, configClazz.getPackageName());
+    }
 
     /**
      * Creates a key that replaces unreadable files with the initial value after backing them up.
@@ -36,6 +53,17 @@ public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> i
      */
     public Key(String name, Path path, Class<T> configClazz, Supplier<T> initValue) {
         this(name, path, configClazz, initValue, false);
+    }
+
+    /**
+     * Checks whether objects of the given class belong to the configuration and are searched for overrides.
+     *
+     * @param clazz class of a nested object
+     * @return true if the class lies in the root package or one of its sub packages
+     */
+    public boolean isInRootPackage(Class<?> clazz) {
+        var packageName = clazz.getPackageName();
+        return packageName.equals(rootPackage) || !rootPackage.isEmpty() && packageName.startsWith(rootPackage + ".");
     }
 
     public static <T> KeyBuilder<T> builder(Path path, Supplier<T> supplier) {
