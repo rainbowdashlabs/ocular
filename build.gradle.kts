@@ -4,7 +4,7 @@ import com.vanniktech.maven.publish.JavadocJar
 plugins {
     java
     `java-library`
-    id("de.chojo.publishdata") version "1.4.0"
+    id("de.chojo.publishdata") version "2.1.0"
     alias(libs.plugins.spotless)
     id("com.vanniktech.maven.publish") version "0.37.0"
 }
