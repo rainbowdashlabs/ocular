@@ -1,5 +1,6 @@
 [versions]
 spotless = "8.10.4"
+palantir = "2.102.0"
 vanniktech = "0.37.0"
 publishdata = "1.4.0"
 slf4j = "2.0.20"

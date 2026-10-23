@@ -46,8 +46,13 @@ dependencies {
 
 spotless {
     java {
+        target("src/**/*.java")
         licenseHeaderFile(rootProject.file("HEADER.txt"))
-        target("**/*.java")
+        palantirJavaFormat(libs.versions.palantir.get()).formatJavadoc(false)
+        removeUnusedImports()
+        importOrder("", "java", "javax", "\\#")
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }
 
@@ -101,15 +106,10 @@ mavenPublishing{
 
 tasks {
     test {
-        dependsOn(spotlessCheck)
         useJUnitPlatform()
         testLogging {
             events("passed", "skipped", "failed")
         }
-    }
-
-    compileJava {
-        dependsOn(spotlessApply)
     }
 
     register<Copy>("copyOverrideReference") {
