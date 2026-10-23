@@ -323,11 +323,12 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             log.error("Could not load configuration file.", e);
             backup(key);
             log.warn("Recreating default config");
-            write(
-                    resolvePath(key),
-                    new FileWrapper<>(determineFormat(key), key.initValue().get()));
+            V value = key.initValue().get();
+            FileWrapper<V> wrapper = new FileWrapper<>(determineFormat(key), value);
+            write(resolvePath(key), wrapper);
+            applyOverrides(value, key);
+            return wrapper;
         }
-        return new FileWrapper<>(determineFormat(key), key.initValue().get());
     }
 
     /**

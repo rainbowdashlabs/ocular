@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AnnotationOverrideTest {
@@ -166,6 +167,17 @@ class AnnotationOverrideTest {
         assertEquals("original-multiSys", target.multiSys);
         assertEquals("original-multiEnv", target.multiEnv);
         assertEquals("original-mixed", target.mixedMultiple);
+    }
+
+    @Test
+    void overridesApplyAfterABrokenFileWasReset() throws IOException {
+        Files.writeString(BASE.resolve("config.json"), "{ not json");
+        System.setProperty("annotationconfig.test", "from-sys");
+
+        AnnotationConfig target = loadViaConfigurations();
+
+        assertEquals("from-sys", target.test);
+        assertFalse(Files.readString(BASE.resolve("config.json")).contains("from-sys"));
     }
 
     private AnnotationConfig loadViaConfigurations() {
