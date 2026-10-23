@@ -1,0 +1,183 @@
+---
+title: Ocular
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Ocular
+
+Ocular manages configuration files for you. It is a small wrapper around Jackson 3. You write plain Java classes,
+and Ocular reads them from files, creates missing files with default values and saves them again.
+
+What you get:
+
+- one place for all configuration files of your application,
+- JSON, YAML and TOML out of the box, picked by the file ending,
+- default files created on first start,
+- broken files backed up and replaced, or kept untouched if you prefer,
+- values overridden by environment variables and system properties,
+- full access to the Jackson mapper when you need it.
+
+## Requirements
+
+| What | Version |
+|---|---|
+| Java | 21 or newer. Ocular is compiled for Java 21. |
+| Jackson | 3 (`tools.jackson`). Ocular brings `jackson-databind` with it. |
+| SLF4J | Ocular logs through `slf4j-api` but does not bring it. Add it if your project does not have it yet. |
+
+## Add the dependency
+
+Ocular is published to Maven Central. It is also mirrored on EldoNexus
+(`https://eldonexus.de/repository/maven-public/`).
+
+<Tabs groupId="build-tool">
+<TabItem value="gradle" label="Gradle (Kotlin DSL)">
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("dev.chojo:ocular:2.3.2")
+}
+```
+
+</TabItem>
+<TabItem value="gradle-groovy" label="Gradle (Groovy)">
+
+```groovy
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'dev.chojo:ocular:2.3.2'
+}
+```
+
+</TabItem>
+<TabItem value="maven" label="Maven">
+
+```xml
+<dependency>
+    <groupId>dev.chojo</groupId>
+    <artifactId>ocular</artifactId>
+    <version>2.3.2</version>
+</dependency>
+```
+
+</TabItem>
+</Tabs>
+
+### YAML and TOML
+
+JSON works right away. For YAML or TOML you add the Jackson module for that format yourself. Ocular only compiles
+against them and does not ship them. Keep all Jackson parts on the same version, for example with the Jackson BOM.
+
+<Tabs groupId="build-tool">
+<TabItem value="gradle" label="Gradle (Kotlin DSL)">
+
+```kotlin
+dependencies {
+    implementation(platform("tools.jackson:jackson-bom:3.1.1"))
+    implementation("tools.jackson.dataformat:jackson-dataformat-yaml")
+    implementation("tools.jackson.dataformat:jackson-dataformat-toml")
+}
+```
+
+</TabItem>
+<TabItem value="gradle-groovy" label="Gradle (Groovy)">
+
+```groovy
+dependencies {
+    implementation platform('tools.jackson:jackson-bom:3.1.1')
+    implementation 'tools.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-toml'
+}
+```
+
+</TabItem>
+<TabItem value="maven" label="Maven">
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>tools.jackson</groupId>
+            <artifactId>jackson-bom</artifactId>
+            <version>3.1.1</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>tools.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>tools.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-toml</artifactId>
+    </dependency>
+</dependencies>
+```
+
+</TabItem>
+</Tabs>
+
+Only add the formats you use. The module has to be there at runtime too, not only at compile time.
+
+## A first look
+
+A configuration is a plain class with fields and default values:
+
+```java
+public class AppConfig {
+    private String host = "localhost";
+    private int port = 8080;
+
+    public String host() {
+        return host;
+    }
+
+    public int port() {
+        return port;
+    }
+}
+```
+
+Describe the file with a `Key` and build a `Configurations` instance:
+
+```java
+Key<AppConfig> key = Key.builder(Path.of("config.yml"), AppConfig::new).build();
+
+Configurations<AppConfig> configurations = Configurations.builder(key, new YamlDataFormat())
+        .setBase(Path.of("config"))
+        .build();
+
+AppConfig config = configurations.main();
+```
+
+On the first call, Ocular writes `config/config.yml` with the default values:
+
+```yaml
+host: "localhost"
+port: 8080
+```
+
+On later starts it reads the file instead.
+
+## Where to go next
+
+- [Create a configuration](./configuration-creation.md): keys, data formats and the builder.
+- [Load and save files](./load-and-save.md): read, save, reload and what happens with broken files.
+- [Customise the mapper](./customise.md): change how Jackson reads and writes.
+- [Configuration overrides](./overrides.mdx): set values from environment variables and system properties.
+- [Jackson Bukkit](./examples/jackson-bukkit.md): use Ocular in a Minecraft plugin.
+- [Javadoc](pathname:///ocular/javadoc/): every class and method.

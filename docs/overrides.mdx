@@ -1,0 +1,299 @@
+---
+title: Configuration overrides
+sidebar_position: 5
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Configuration overrides
+
+Ocular can override values from your files with environment variables and JVM system properties. That way you run
+the same application in development, staging and production without touching the files.
+
+## How it works
+
+There are two parts:
+
+1. **At compile time** an annotation processor finds the fields you marked. For each class it generates a helper
+   class that reads the environment variables and system properties.
+2. **At runtime** Ocular reads the file and then uses the helper class to replace values that were set from
+   outside.
+
+Overrides win over the values in the file. They are applied every time the file is read, also on reload.
+
+## Set up the annotation processor
+
+The processor is part of the Ocular artifact.
+
+<Tabs groupId="build-tool">
+<TabItem value="gradle" label="Gradle (Kotlin DSL)">
+
+Gradle only runs processors you list in `annotationProcessor`:
+
+```kotlin
+dependencies {
+    implementation("dev.chojo:ocular:2.3.2")
+    annotationProcessor("dev.chojo:ocular:2.3.2")
+}
+```
+
+</TabItem>
+<TabItem value="gradle-groovy" label="Gradle (Groovy)">
+
+Gradle only runs processors you list in `annotationProcessor`:
+
+```groovy
+dependencies {
+    implementation 'dev.chojo:ocular:2.3.2'
+    annotationProcessor 'dev.chojo:ocular:2.3.2'
+}
+```
+
+</TabItem>
+<TabItem value="maven" label="Maven">
+
+Maven runs the processors it finds on the class path, so the normal dependency is enough. If your build sets
+`annotationProcessorPaths` on the compiler plugin, add Ocular there:
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+        <annotationProcessorPaths>
+            <path>
+                <groupId>dev.chojo</groupId>
+                <artifactId>ocular</artifactId>
+                <version>2.3.2</version>
+            </path>
+        </annotationProcessorPaths>
+    </configuration>
+</plugin>
+```
+
+</TabItem>
+</Tabs>
+
+## Mark fields
+
+Put `@Overwrite` on every field that may be overridden. Inside it, list the sources:
+
+- `@Env` reads an environment variable.
+- `@Prop` reads a system property, set with `-D` on the command line.
+
+```java
+public class AppConfig {
+    @Overwrite(env = @Env("APP_HOST"), prop = @Prop("app.host"), description = "Host the server binds to")
+    private String host = "localhost";
+
+    @Overwrite(env = @Env("APP_PORT"), prop = @Prop("app.port"))
+    private int port = 8080;
+
+    @Overwrite(env = @Env("APP_DEBUG"))
+    private boolean debug = false;
+}
+```
+
+With this class:
+
+- `APP_HOST=example.com` sets `host` to `example.com`.
+- `-Dapp.port=9090` sets `port` to `9090`.
+- If nothing is set, the value from the file stays.
+
+`description` is optional. It shows up in the log and in the [reference file](#reference-file).
+
+:::warning
+An overridden value is a normal value of your object. When you save the file, the overridden value is written into
+it.
+:::
+
+### Order of sources
+
+The sources are checked in the order you write them. The first one that has a value wins.
+
+```java
+@Overwrite(prop = @Prop("app.host"), env = @Env("APP_HOST"))
+private String host;
+```
+
+Here the system property wins when both are set. Swap `prop` and `env` to let the environment variable win.
+
+Each attribute takes several sources, too. They are checked in order:
+
+```java
+@Overwrite(env = {@Env("APP_HOST"), @Env("HOST")})
+private String host;
+```
+
+### Names without a value
+
+Leave the name out and Ocular builds one from the class and the field:
+
+| Source | Name | Example for field `maxPlayers` in `AppConfig` |
+|---|---|---|
+| `@Env` | `CLASSNAME_FIELDNAME`, all upper case | `APPCONFIG_MAXPLAYERS` |
+| `@Prop` | `classname.fieldName`, class name in lower case, field name as written | `appconfig.maxPlayers` |
+
+```java
+public class AppConfig {
+    @Overwrite(env = @Env, prop = @Prop)
+    private String host = "localhost";
+}
+```
+
+This field reads the environment variable `APPCONFIG_HOST` and the system property `appconfig.host`.
+
+The class name is the simple name of the class that declares the field.
+
+## Prefix
+
+`@OverwritePrefix` on the class replaces the class name in generated names:
+
+```java
+@OverwritePrefix("myapp")
+public class AppConfig {
+    @Overwrite(env = @Env, prop = @Prop)
+    private String host = "localhost";
+}
+```
+
+This field reads `MYAPP_HOST` and `myapp.host`.
+
+The prefix is adjusted to each source. For `@Env` it is upper case and dots become underscores. For `@Prop` it is
+lower case and underscores become dots. The prefix `my_app` gives `MY_APP_HOST` and `my.app.host`.
+
+Names you write yourself are used as they are:
+
+```java
+@OverwritePrefix("myapp")
+public class AppConfig {
+    @Overwrite(env = @Env("CUSTOM_HOST"))
+    private String host = "localhost";
+}
+```
+
+This field reads `CUSTOM_HOST`.
+
+### Force the prefix
+
+With `force = true` the prefix is put in front of your own names, too:
+
+```java
+@OverwritePrefix(value = "myapp", force = true)
+public class AppConfig {
+    @Overwrite(env = @Env("HOST"), prop = @Prop("server.host"))
+    private String host = "localhost";
+}
+```
+
+This field reads `MYAPP_HOST` and `myapp.server.host`. Only the prefix is changed. Your own part is used exactly as
+you wrote it.
+
+## Supported types
+
+Environment variables and system properties are text. Ocular converts them to the type of the field:
+
+- `String`
+- `int`, `long`, `double`, `float`, `short`, `byte` and their wrapper classes
+- `boolean` and `Boolean`. `true` in any case means true, everything else means false.
+- enums. An exact match of the constant name wins, otherwise the case is ignored, so `warn` reads as `WARN`.
+- arrays, `List` and `Set` of the types above, written as a comma separated value like `INFO,WARN`. Spaces around
+  the values are removed. A `List` becomes an `ArrayList`, a `Set` a `HashSet`.
+
+If a value cannot be converted, for example `abc` for an `int` or an unknown enum constant, Ocular logs a warning and
+keeps the value from the file. The same happens for field types that are not in the list.
+
+## Methods
+
+`@Overwrite` also works on methods. The generated names use the method name instead of the field name.
+
+- A method with one parameter is called with the converted value. Use it like a setter.
+- A method without parameters is treated as a getter. Ocular writes the value into the field behind it. It looks
+  for a field with the same name as the method, then for the field of a `getX` or `isX` method, then for the
+  longest field name the method name starts with. The field must have the return type of the method.
+
+```java
+public class AppConfig {
+    private String greeting = "hello";
+
+    @Overwrite(prop = @Prop("app.greeting"))
+    public String greeting() {
+        return greeting;
+    }
+}
+```
+
+## Nested objects
+
+Overrides also work on fields of nested objects, like a `database` section in your main class:
+
+```java
+public class AppConfig {
+    private Database database = new Database();
+}
+```
+
+```java
+public class Database {
+    @Overwrite(env = @Env, prop = @Prop)
+    private String host = "localhost";
+}
+```
+
+The generated names use the class that declares the field, so this reads `DATABASE_HOST` and `database.host`.
+
+Ocular only looks inside objects whose class lies in the root package of the key. That is the package of the
+configuration class and its sub packages. Objects of other classes, such as JDK types, are left alone. Collections,
+maps, arrays and static fields are skipped too.
+
+If your nested classes live in another package, widen the root package on the key:
+
+```java
+Key<AppConfig> key = Key.builder(Path.of("config.yml"), AppConfig::new)
+        .rootPackage("com.example")
+        .build();
+```
+
+:::warning
+Put every class that uses `@Overwrite` into its own file. The annotation processor fails on classes nested inside
+another class, for example a `public static class Database` inside `AppConfig`.
+:::
+
+## Reference file
+
+The annotation processor writes a list of all overrides to `META-INF/ocular/overrides.md` in your compiled classes,
+so it also ends up in your jar. With Gradle you find it at `build/classes/java/main/META-INF/ocular/overrides.md`.
+
+```text
+# Ocular Override Reference
+
+This file is auto-generated by the Ocular annotation processor.
+It lists all available configuration overrides.
+
+## com.example.AppConfig
+
+### host
+
+Host the server binds to
+
+Sources (in priority order):
+- Environment: `APP_HOST`
+- Property: `app.host`
+```
+
+Ocular also logs the available overrides of a class each time it applies them:
+
+```text
+Available overrides for AppConfig:
+  Property: app.host - Host the server binds to
+  Environment: APP_HOST - Host the server binds to
+```
+
+## Under the hood
+
+For a class `com.example.AppConfig` the processor generates `com.example.AppConfig_OcularOverride`. Its constructor
+reads the environment variables and system properties and keeps every value it finds.
+
+After Ocular reads a file, it loads that class with the class loader of the `Configurations` instance. If there is
+no such class, because no field was marked, the object stays as it is.
