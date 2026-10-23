@@ -470,7 +470,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             }
         }
         if (parent != null) {
-            parent.determineFormat(key);
+            return parent.determineFormat(key);
         }
         throw new UnknownFormatException(key, formats);
     }
