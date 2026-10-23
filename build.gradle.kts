@@ -114,9 +114,9 @@ tasks {
 
     register<Copy>("copyOverrideReference") {
         description = "Copies the generated override reference file to build/ocular/"
-        from(fileTree(layout.buildDirectory) {
-            include("**/META-INF/ocular/overrides.md")
-        })
+        from(sourceSets.main.get().output.classesDirs + sourceSets.test.get().output.classesDirs) {
+            include("META-INF/ocular/overrides.md")
+        }
         eachFile {
             relativePath = RelativePath(true, name)
         }
