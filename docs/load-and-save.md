@@ -100,7 +100,7 @@ By default Ocular repairs the file:
 
 1. It logs the error.
 2. It renames the broken file to `backup_<date>_<file name>` in the same directory, for example
-   `backup_2026-10-23_03-15_config.yml`.
+   `backup_2026-10-23_15-03_config.yml`. The time is in 24-hour format.
 3. It writes a new file with the default value and returns that value, with [overrides](./overrides.mdx) applied as
    on every load.
 

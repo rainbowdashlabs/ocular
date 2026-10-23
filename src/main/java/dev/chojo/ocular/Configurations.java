@@ -58,7 +58,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @param <T> the type of the primary configuration data
  */
 public class Configurations<T> implements Configurator<ObjectMapper, MapperBuilder<ObjectMapper, ?>> {
-    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm");
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
     private static final Logger log = getLogger(Configurations.class);
     protected final Configurations<?> parent;
     private final Path base;
@@ -355,7 +355,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         log.warn("Backing up {} to {}", target, backupName);
         try {
             Files.move(target, target.getParent().resolve(backupName));
-            log.error("Backup done.");
+            log.info("Backup done.");
         } catch (IOException e) {
             log.error("Could not create backup.");
         }
