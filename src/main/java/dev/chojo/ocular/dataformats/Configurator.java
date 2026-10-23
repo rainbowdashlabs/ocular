@@ -13,6 +13,9 @@ import tools.jackson.databind.cfg.MapperBuilder;
  * or MapperBuilder instances. The Configurator interface provides
  * a set of methods to allow customization and setup of mappers
  * for reading, writing, and general configuration tasks.
+ * <p>
+ * The builder methods run before the mapper is built and are the place to change settings. The mapper methods
+ * receive the built mapper afterwards; Jackson 3 mappers are immutable, so they can only inspect it.
  *
  * @param <M> the type of the ObjectMapper
  * @param <B> the type of the MapperBuilder

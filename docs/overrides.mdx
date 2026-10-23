@@ -255,10 +255,8 @@ Key<AppConfig> key = Key.builder(Path.of("config.yml"), AppConfig::new)
         .build();
 ```
 
-:::warning
-Put every class that uses `@Overwrite` into its own file. The annotation processor fails on classes nested inside
-another class, for example a `public static class Database` inside `AppConfig`.
-:::
+Classes nested inside another class work too, for example a `public static class Database` inside `AppConfig`.
+Their default prefix is their own simple name, `database`.
 
 ## Reference file
 
@@ -282,7 +280,7 @@ Sources (in priority order):
 - Property: `app.host`
 ```
 
-Ocular also logs the available overrides of a class each time it applies them:
+Ocular also logs the available overrides of a class each time it applies them, in the order they are tried:
 
 ```text
 Available overrides for AppConfig:

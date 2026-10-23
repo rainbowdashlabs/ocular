@@ -32,10 +32,6 @@ public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder
 
     @Override
     public void assertInstalled() throws MissingDataTypeInstallationException {
-        try {
-            Class.forName(YAMLMapper.class.getName());
-        } catch (ClassNotFoundException e) {
-            throw new MissingDataTypeInstallationException(type(), "tools.jackson.dataformat:jackson-dataformat-yaml");
-        }
+        DataFormats.requireModule(DataFormats.YAML_MAPPER, type(), DataFormats.YAML_MODULE);
     }
 }

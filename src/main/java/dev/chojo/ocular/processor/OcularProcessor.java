@@ -23,13 +23,11 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -71,13 +69,16 @@ import javax.tools.StandardLocation;
 // These two annotations tell the Java compiler which annotations this processor cares about
 // and which Java version it targets. Without them, the compiler wouldn't know to invoke this class.
 @SupportedAnnotationTypes("dev.chojo.ocular.override.Overwrite")
-@SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class OcularProcessor extends AbstractProcessor {
 
     // The Filer is the compiler's API for creating new source files on disk during compilation.
     private Filer filer;
     // The Messager lets us print errors/warnings that show up in the compiler output (like javac warnings).
     private Messager messager;
+    /**
+     * Overrides found in every round, written to the reference file once the last round is done.
+     */
+    private final Map<String, List<OverrideInfo>> allOverrides = new LinkedHashMap<>();
 
     /**
      * Writes a single lookup block into the generated constructor.
@@ -110,6 +111,11 @@ public class OcularProcessor extends AbstractProcessor {
      * and the {@link Messager} (used to report errors/warnings back to the compiler).
      */
     @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+
+    @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
@@ -135,9 +141,6 @@ public class OcularProcessor extends AbstractProcessor {
                     .add(element);
         }
 
-        // Collect override info for the reference file
-        Map<String, List<OverrideInfo>> allOverrides = new LinkedHashMap<>();
-
         // Generate one override provider class per config class
         for (Map.Entry<TypeElement, List<Element>> entry : classesToProcess.entrySet()) {
             try {
@@ -152,7 +155,7 @@ public class OcularProcessor extends AbstractProcessor {
         }
 
         // Generate reference documentation file
-        if (!allOverrides.isEmpty()) {
+        if (roundEnv.processingOver() && !allOverrides.isEmpty()) {
             try {
                 generateOverrideDocumentation(allOverrides);
             } catch (IOException e) {
@@ -210,7 +213,9 @@ public class OcularProcessor extends AbstractProcessor {
     private List<OverrideInfo> generateOverrideProvider(TypeElement typeElement, List<Element> elements)
             throws IOException {
         // Extract the package (e.g. "com.example") so we can put the generated file in the same package
-        String packageName = ((PackageElement) typeElement.getEnclosingElement())
+        String packageName = processingEnv
+                .getElementUtils()
+                .getPackageOf(typeElement)
                 .getQualifiedName()
                 .toString();
         // Full name like "com.example.MyConfig"
@@ -268,6 +273,19 @@ public class OcularProcessor extends AbstractProcessor {
             out.println("@Override");
             out.beginBlock("public Optional<Object> getValue(String fieldOrMethodName) {");
             out.println("return Optional.ofNullable(overrides.get(fieldOrMethodName));");
+            out.endBlock();
+
+            out.println();
+            out.println("@Override");
+            out.beginBlock("public java.util.Map<String, java.util.List<String>> sources() {");
+            out.println("java.util.Map<String, java.util.List<String>> sources = new java.util.LinkedHashMap<>();");
+            for (OverrideInfo info : overrideInfos) {
+                String sources = info.sources().stream()
+                        .map(source -> "\"" + javaString(source.replace("`", "")) + "\"")
+                        .collect(java.util.stream.Collectors.joining(", "));
+                out.println("sources.put(\"{}\", java.util.List.of({}));", info.fieldName(), sources);
+            }
+            out.println("return sources;");
             out.endBlock();
 
             out.endBlock();
@@ -357,6 +375,13 @@ public class OcularProcessor extends AbstractProcessor {
             }
         }
         return new OverrideInfo(fieldName, description, sources);
+    }
+
+    /**
+     * Escapes a value for use inside a Java string literal of the generated source.
+     */
+    private static String javaString(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     /**

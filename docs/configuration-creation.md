@@ -63,13 +63,17 @@ Ocular ships three data formats:
 See [YAML and TOML](./index.mdx#yaml-and-toml) for how to add the extra dependencies.
 
 ```java
-JsonDataFormat json = new JsonDataFormat();
-JsonDataFormat prettyJson = new JsonDataFormat(true);
-YamlDataFormat yaml = new YamlDataFormat();
-TomlDataFormat toml = new TomlDataFormat();
+JsonDataFormat json = DataFormats.json();
+JsonDataFormat prettyJson = DataFormats.json(true);
+YamlDataFormat yaml = DataFormats.yaml();
+TomlDataFormat toml = DataFormats.toml();
 ```
 
-`JsonDataFormat` writes everything on one line by default. Pass `true` to the constructor to get indented output.
+`DataFormats` checks that the module of a format is there. Without it, `DataFormats.yaml()` throws a
+`MissingDataTypeInstallationException` that names the dependency to add. Creating a format with `new YamlDataFormat()`
+works too, but then a missing module ends in a `NoClassDefFoundError`.
+
+`JsonDataFormat` writes everything on one line by default. Pass `true` to get indented output.
 
 ```json
 {
@@ -115,6 +119,7 @@ This instance reads and writes JSON and YAML files. All relative paths live in t
 | `addFormat(DataFormat)` | Registers one more data format. | Only the format passed to `builder(...)` |
 | `addFormats(List<DataFormat<?, ?>>)` | Registers several data formats at once. | |
 | `withClassLoader(ClassLoader)` | The class loader Jackson uses to find classes. | The context class loader of the current thread |
+| `parent(Configurations)` | Another instance to fall back to. A file ending none of this instance's formats matches uses the parent's format, and the parent's modules are registered too. | No parent |
 | `addModule(JacksonModule)` | Registers a Jackson module on every mapper. There is also a version that takes a collection. | No modules |
 | `configureBuilder(...)` | Changes the Jackson mapper builder. | |
 | `configureReaderBuilder(...)` | Changes the mapper builder for reading only. | |

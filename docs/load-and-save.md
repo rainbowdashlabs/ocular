@@ -100,8 +100,9 @@ By default Ocular repairs the file:
 
 1. It logs the error.
 2. It renames the broken file to `backup_<date>_<file name>` in the same directory, for example
-   `backup_2026-10-23_03-15_config.yml`.
-3. It writes a new file with the default value and returns the default value.
+   `backup_2026-10-23_15-03_config.yml`. The time is in 24-hour format.
+3. It writes a new file with the default value and returns that value, with [overrides](./overrides.mdx) applied as
+   on every load.
 
 That is fine for settings, but bad for files that hold data your users wrote. Mark those keys as strict:
 
@@ -135,3 +136,6 @@ public class AppConfig implements ConfigSubscriber {
 | `preWrite` | before the object is written, also when a default file is created |
 
 Both methods have empty defaults, so you only implement what you need.
+
+If `postRead` asks the same `Configurations` for the key that is being loaded right now, it gets a fresh default
+value instead of loading the file a second time.

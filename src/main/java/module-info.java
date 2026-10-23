@@ -1,7 +1,7 @@
 module dev.chojo.ocular {
     requires com.fasterxml.jackson.annotation;
     requires java.compiler;
-    requires org.jetbrains.annotations;
+    requires static org.jetbrains.annotations;
     requires org.slf4j;
     requires tools.jackson.core;
     requires tools.jackson.databind;
@@ -17,4 +17,7 @@ module dev.chojo.ocular {
     exports dev.chojo.ocular.locks;
     exports dev.chojo.ocular.override;
     exports dev.chojo.ocular.processor;
+
+    provides javax.annotation.processing.Processor with
+            dev.chojo.ocular.processor.OcularProcessor;
 }

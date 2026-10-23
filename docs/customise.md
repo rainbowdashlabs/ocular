@@ -14,7 +14,7 @@ In Jackson 3 a mapper cannot be changed once it is built, so all settings go on 
 
 Before your own settings, Ocular sets these on every mapper builder:
 
-- **Fields, not getters.** Jackson sees all fields, including private ones. `get...` methods are ignored.
+- **Fields, not getters.** Jackson sees all fields, including private ones. `get...` and `is...` methods are ignored.
 - **Enums ignore case.** `warn`, `Warn` and `WARN` all read as the constant `WARN`.
 - **Your class loader.** Jackson looks up classes with the class loader set through `withClassLoader(...)`.
 - **Your modules.** Every module added with `addModule(...)` is registered.
@@ -39,6 +39,10 @@ Configurations<AppConfig> configurations = Configurations.builder(main, new Json
 | `configureWriterBuilder` | only the writing mapper |
 
 Each method keeps only the last consumer you pass. Put all settings for one hook into one consumer.
+
+There are matching hooks for the finished mapper: `configureMapper`, `configureReaderMapper` and
+`configureWriterMapper`. They run right after the mapper is built. Jackson 3 mappers can not be changed once built, so
+these hooks are for looking at the mapper, for example to log its settings. Make every change in the builder hooks.
 
 The consumers apply to every data format of this instance.
 

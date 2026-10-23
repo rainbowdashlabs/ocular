@@ -58,7 +58,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @param <T> the type of the primary configuration data
  */
 public class Configurations<T> implements Configurator<ObjectMapper, MapperBuilder<ObjectMapper, ?>> {
-    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm");
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
     private static final Logger log = getLogger(Configurations.class);
     protected final Configurations<?> parent;
     private final Path base;
@@ -297,7 +297,8 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     protected VisibilityChecker visibilityChecker(VisibilityChecker visibilityChecker) {
         return visibilityChecker
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE);
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE);
     }
 
     /**
@@ -323,11 +324,12 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             log.error("Could not load configuration file.", e);
             backup(key);
             log.warn("Recreating default config");
-            write(
-                    resolvePath(key),
-                    new FileWrapper<>(determineFormat(key), key.initValue().get()));
+            V value = key.initValue().get();
+            FileWrapper<V> wrapper = new FileWrapper<>(determineFormat(key), value);
+            write(resolvePath(key), wrapper);
+            applyOverrides(value, key);
+            return wrapper;
         }
-        return new FileWrapper<>(determineFormat(key), key.initValue().get());
     }
 
     /**
@@ -354,7 +356,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         log.warn("Backing up {} to {}", target, backupName);
         try {
             Files.move(target, target.getParent().resolve(backupName));
-            log.error("Backup done.");
+            log.info("Backup done.");
         } catch (IOException e) {
             log.error("Could not create backup.");
         }
@@ -470,7 +472,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             }
         }
         if (parent != null) {
-            parent.determineFormat(key);
+            return parent.determineFormat(key);
         }
         throw new UnknownFormatException(key, formats);
     }

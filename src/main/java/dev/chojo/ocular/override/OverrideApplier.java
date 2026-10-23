@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -61,7 +62,7 @@ public final class OverrideApplier {
         Class<?> clazz = object.getClass();
 
         // Log available overrides with their descriptions
-        logAvailableOverrides(clazz);
+        logAvailableOverrides(clazz, supplier);
 
         // Walk through every field in the config class (e.g. "private String host")
         // and check if the generated supplier has an override value for that field name.
@@ -200,7 +201,16 @@ public final class OverrideApplier {
      * if provided via the {@link Overwrite#description()} attribute.
      * Takes {@link OverwritePrefix} into account for deriving default keys and forced prefixes.
      */
-    private static void logAvailableOverrides(Class<?> clazz) {
+    private static void logAvailableOverrides(Class<?> clazz, ValueSupplier supplier) {
+        Map<String, List<String>> sources = supplier.sources();
+        if (!sources.isEmpty()) {
+            log.info("Available overrides for {}:", clazz.getSimpleName());
+            sources.forEach((member, memberSources) -> {
+                String desc = description(clazz, member);
+                memberSources.forEach(source -> log.info("  {}{}", source, desc));
+            });
+            return;
+        }
         String prefix = clazz.getSimpleName();
         boolean forcePrefix = false;
         OverwritePrefix overwritePrefix = clazz.getAnnotation(OverwritePrefix.class);
@@ -230,6 +240,21 @@ public final class OverrideApplier {
                 logOverwriteSources(overwrite, prefix, forcePrefix, method.getName());
             }
         }
+    }
+
+    /**
+     * Returns the description of the {@link Overwrite} on the field or method with the given name, prefixed for the
+     * log, or an empty string when there is none.
+     */
+    private static String description(Class<?> clazz, String member) {
+        Overwrite overwrite = null;
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.getName().equals(member)) overwrite = field.getAnnotation(Overwrite.class);
+        }
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (overwrite == null && method.getName().equals(member)) overwrite = method.getAnnotation(Overwrite.class);
+        }
+        return overwrite == null || overwrite.description().isEmpty() ? "" : " - " + overwrite.description();
     }
 
     /**
