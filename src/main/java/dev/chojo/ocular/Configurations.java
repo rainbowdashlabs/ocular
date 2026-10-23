@@ -68,7 +68,12 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     private final Map<Key<?>, FileWrapper<?>> files = new HashMap<>();
     private final KeyLocks locks = new KeyLocks();
 
-    public Configurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats, ClassLoader classLoader, Configurations<?> parent) {
+    public Configurations(
+            Path base,
+            @NotNull Key<T> main,
+            List<DataFormat<?, ?>> formats,
+            ClassLoader classLoader,
+            Configurations<?> parent) {
         this.base = base;
         this.main = main;
         this.parent = parent;
@@ -125,7 +130,8 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
 
         KeyLock keyLock = locks.tryLock(key);
         if (keyLock == null) {
-            // Very rare keys which so far exists for minecraft plugins when the config is created and the log level is read from it.
+            // Very rare keys which so far exists for minecraft plugins when the config is created and the log level is
+            // read from it.
             return key.initValue().get();
         }
 
@@ -254,15 +260,14 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     }
 
     @Override
-    public void configure(ObjectMapper mapper) {
-    }
+    public void configure(ObjectMapper mapper) {}
 
     @Override
     public void configure(MapperBuilder<ObjectMapper, ?> builder) {
         // This is very important when using polymorphism and library loader feature.
         builder.typeFactory(TypeFactory.createDefaultInstance().withClassLoader(classLoader))
-               .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
-               .changeDefaultVisibility(this::visibilityChecker);
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .changeDefaultVisibility(this::visibilityChecker);
     }
 
     public Path base() {
@@ -290,8 +295,9 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @return the updated visibility checker with the specified visibility settings
      */
     protected VisibilityChecker visibilityChecker(VisibilityChecker visibilityChecker) {
-        return visibilityChecker.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                                .withGetterVisibility(JsonAutoDetect.Visibility.NONE);
+        return visibilityChecker
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE);
     }
 
     /**
@@ -317,7 +323,9 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
             log.error("Could not load configuration file.", e);
             backup(key);
             log.warn("Recreating default config");
-            write(resolvePath(key), new FileWrapper<>(determineFormat(key), key.initValue().get()));
+            write(
+                    resolvePath(key),
+                    new FileWrapper<>(determineFormat(key), key.initValue().get()));
         }
         return new FileWrapper<>(determineFormat(key), key.initValue().get());
     }
@@ -409,7 +417,8 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                 // Look up the generated override class by its conventional name
                 Class<?> overrideClass = Class.forName(candidate + "_OcularOverride", true, classLoader);
                 // Create an instance — the constructor reads env and props into its internal map
-                ValueSupplier supplier = (ValueSupplier) overrideClass.getDeclaredConstructor().newInstance();
+                ValueSupplier supplier =
+                        (ValueSupplier) overrideClass.getDeclaredConstructor().newInstance();
                 // Apply the collected override values to the config object's fields/methods
                 OverrideApplier.applyOverrides(object, supplier);
                 break;
@@ -430,18 +439,24 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                     applyOverridesRecursive(nested, nested.getClass(), key, visited);
                 }
             } catch (IllegalAccessException | InaccessibleObjectException e) {
-                log.warn("Could not access field {} for nested override application: {}", field.getName(), e.getMessage());
+                log.warn(
+                        "Could not access field {} for nested override application: {}",
+                        field.getName(),
+                        e.getMessage());
             }
         }
     }
 
     private static boolean isLeafType(Class<?> type) {
-        return type.isPrimitive() || type.isArray() || type.isEnum()
-               || type == String.class
-               || Number.class.isAssignableFrom(type)
-               || type == Boolean.class || type == Character.class
-               || Collection.class.isAssignableFrom(type)
-               || Map.class.isAssignableFrom(type);
+        return type.isPrimitive()
+                || type.isArray()
+                || type.isEnum()
+                || type == String.class
+                || Number.class.isAssignableFrom(type)
+                || type == Boolean.class
+                || type == Character.class
+                || Collection.class.isAssignableFrom(type)
+                || Map.class.isAssignableFrom(type);
     }
 
     private Path resolvePath(Key<?> key) {

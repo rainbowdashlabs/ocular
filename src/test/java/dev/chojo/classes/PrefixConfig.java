@@ -6,8 +6,8 @@
 package dev.chojo.classes;
 
 import dev.chojo.ocular.override.Env;
-import dev.chojo.ocular.override.OverwritePrefix;
 import dev.chojo.ocular.override.Overwrite;
+import dev.chojo.ocular.override.OverwritePrefix;
 import dev.chojo.ocular.override.Prop;
 
 @OverwritePrefix("myapp")

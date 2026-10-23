@@ -27,15 +27,19 @@ public class ModifyableConfigurations<T> extends Configurations<T> {
     private final Consumer<ObjectMapper> configureMapper;
     private final List<JacksonModule> modules;
 
-
-    public ModifyableConfigurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats,
-                                    ClassLoader classLoader, Configurations<?> parent,
-                                    Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder,
-                                    Consumer<ObjectMapper> configureReaderMapper,
-                                    Consumer<MapperBuilder<ObjectMapper, ?>> configureWriterBuilder,
-                                    Consumer<ObjectMapper> configureWriterMapper,
-                                    Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder,
-                                    Consumer<ObjectMapper> configureMapper, List<JacksonModule> modules) {
+    public ModifyableConfigurations(
+            Path base,
+            @NotNull Key<T> main,
+            List<DataFormat<?, ?>> formats,
+            ClassLoader classLoader,
+            Configurations<?> parent,
+            Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder,
+            Consumer<ObjectMapper> configureReaderMapper,
+            Consumer<MapperBuilder<ObjectMapper, ?>> configureWriterBuilder,
+            Consumer<ObjectMapper> configureWriterMapper,
+            Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder,
+            Consumer<ObjectMapper> configureMapper,
+            List<JacksonModule> modules) {
         super(base, main, formats, classLoader, parent);
         this.configureReaderBuilder = configureReaderBuilder;
         this.configureReaderMapper = configureReaderMapper;

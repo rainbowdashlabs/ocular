@@ -26,7 +26,11 @@ public class UnknownFormatException extends RuntimeException {
      * @param supported the collection of supported configuration formats
      */
     public UnknownFormatException(Key<?> key, Collection<Format<?, ?>> supported) {
-        super("No format for %s registered. Supported formats are: %s".formatted(key.path().getFileName().toString(),
-                supported.stream().map(format -> format.format().formatString()).collect(Collectors.joining(", "))));
+        super("No format for %s registered. Supported formats are: %s"
+                .formatted(
+                        key.path().getFileName().toString(),
+                        supported.stream()
+                                .map(format -> format.format().formatString())
+                                .collect(Collectors.joining(", "))));
     }
 }

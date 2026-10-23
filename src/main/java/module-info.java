@@ -17,5 +17,4 @@ module dev.chojo.ocular {
     exports dev.chojo.ocular.locks;
     exports dev.chojo.ocular.override;
     exports dev.chojo.ocular.processor;
-
 }

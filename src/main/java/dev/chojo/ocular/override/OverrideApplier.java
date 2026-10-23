@@ -38,8 +38,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public final class OverrideApplier {
     private static final Logger log = getLogger(OverrideApplier.class);
 
-    private OverrideApplier() {
-    }
+    private OverrideApplier() {}
 
     /**
      * Applies all available overrides from the given supplier to the configuration object.
@@ -98,7 +97,8 @@ public final class OverrideApplier {
                 try {
                     method.setAccessible(true);
                     // Convert the string value to match the method's parameter type
-                    Object value = convertValue(method.getParameterTypes()[0], method.getGenericParameterTypes()[0], override.get());
+                    Object value = convertValue(
+                            method.getParameterTypes()[0], method.getGenericParameterTypes()[0], override.get());
                     if (value != null) {
                         // Call the method on the config object, passing the override value
                         method.invoke(object, value);
@@ -108,7 +108,10 @@ public final class OverrideApplier {
                 } catch (IllegalArgumentException e) {
                     log.warn("Could not convert override value for method {}: {}", method.getName(), e.getMessage());
                 } catch (java.lang.reflect.InvocationTargetException e) {
-                    log.warn("Override method {} threw an exception: {}", method.getName(), e.getCause().getMessage());
+                    log.warn(
+                            "Override method {} threw an exception: {}",
+                            method.getName(),
+                            e.getCause().getMessage());
                 }
             }
         }
@@ -126,14 +129,16 @@ public final class OverrideApplier {
                 if (targetField != null) {
                     try {
                         targetField.setAccessible(true);
-                        Object value = convertValue(targetField.getType(), targetField.getGenericType(), override.get());
+                        Object value =
+                                convertValue(targetField.getType(), targetField.getGenericType(), override.get());
                         if (value != null) {
                             targetField.set(object, value);
                         }
                     } catch (IllegalAccessException e) {
                         log.warn("Could not set override for getter {}: {}", method.getName(), e.getMessage());
                     } catch (IllegalArgumentException e) {
-                        log.warn("Could not convert override value for getter {}: {}", method.getName(), e.getMessage());
+                        log.warn(
+                                "Could not convert override value for getter {}: {}", method.getName(), e.getMessage());
                     }
                 } else {
                     log.warn("Could not find backing field for getter method {}", method.getName());
@@ -180,7 +185,9 @@ public final class OverrideApplier {
         int bestLength = 0;
         for (Field field : clazz.getDeclaredFields()) {
             String fname = field.getName();
-            if (methodName.startsWith(fname) && fname.length() > bestLength && field.getType().equals(returnType)) {
+            if (methodName.startsWith(fname)
+                    && fname.length() > bestLength
+                    && field.getType().equals(returnType)) {
                 bestMatch = field;
                 bestLength = fname.length();
             }
@@ -229,7 +236,8 @@ public final class OverrideApplier {
      * Logs the property and environment variable sources for a single {@link Overwrite} annotation,
      * taking the prefix and force flag into account.
      */
-    private static void logOverwriteSources(Overwrite overwrite, String prefix, boolean forcePrefix, String memberName) {
+    private static void logOverwriteSources(
+            Overwrite overwrite, String prefix, boolean forcePrefix, String memberName) {
         String desc = overwrite.description().isEmpty() ? "" : " - " + overwrite.description();
         for (Prop prop : overwrite.prop()) {
             String propPrefix = prefix.replace("_", ".").toLowerCase();

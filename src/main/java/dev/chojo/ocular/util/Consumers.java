@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 
 public class Consumers {
     public static <T> Consumer<T> identity() {
-        return t -> {
-        };
+        return t -> {};
     }
 }

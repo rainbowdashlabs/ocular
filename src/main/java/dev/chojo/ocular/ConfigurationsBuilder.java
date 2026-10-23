@@ -41,7 +41,6 @@ public class ConfigurationsBuilder<T> {
     private Consumer<MapperBuilder<ObjectMapper, ?>> configureBuilder = Consumers.identity();
     private Consumer<ObjectMapper> configureMapper = Consumers.identity();
 
-
     /**
      * Constructs a new instance of the ConfigurationsBuilder.
      *
@@ -115,7 +114,8 @@ public class ConfigurationsBuilder<T> {
      *                               customizing the configuration of the reader's {@link ObjectMapper}
      * @return self
      */
-    public ConfigurationsBuilder<T> configureReaderBuilder(Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder) {
+    public ConfigurationsBuilder<T> configureReaderBuilder(
+            Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder) {
         this.configureReaderBuilder = configureReaderBuilder;
         return this;
     }
@@ -141,7 +141,8 @@ public class ConfigurationsBuilder<T> {
      * @param configureWriterBuilder a {@link Consumer} that applies custom configurations to the writer builder
      * @return self
      */
-    public ConfigurationsBuilder<T> configureWriterBuilder(Consumer<MapperBuilder<ObjectMapper, ?>> configureWriterBuilder) {
+    public ConfigurationsBuilder<T> configureWriterBuilder(
+            Consumer<MapperBuilder<ObjectMapper, ?>> configureWriterBuilder) {
         this.configureWriterBuilder = configureWriterBuilder;
         return this;
     }
@@ -207,6 +208,18 @@ public class ConfigurationsBuilder<T> {
     }
 
     public Configurations<T> build() {
-        return new ModifyableConfigurations<>(base, main, formats, classLoader, parent, configureReaderBuilder, configureReaderMapper, configureWriterBuilder, configureWriterMapper, configureBuilder, configureMapper, modules);
+        return new ModifyableConfigurations<>(
+                base,
+                main,
+                formats,
+                classLoader,
+                parent,
+                configureReaderBuilder,
+                configureReaderMapper,
+                configureWriterBuilder,
+                configureWriterMapper,
+                configureBuilder,
+                configureMapper,
+                modules);
     }
 }

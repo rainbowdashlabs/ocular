@@ -26,10 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DefaultValueOverrideTest {
 
     private static final Path BASE = Path.of("default_value_test_config");
-    private static final Key<DefaultValueConfig> CONFIG_KEY = Key.builder(
-            Path.of("config.json"),
-            DefaultValueConfig::new
-    ).build();
+    private static final Key<DefaultValueConfig> CONFIG_KEY =
+            Key.builder(Path.of("config.json"), DefaultValueConfig::new).build();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -47,9 +45,7 @@ class DefaultValueOverrideTest {
 
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
-                walker.map(Path::toFile)
-                      .sorted(Comparator.reverseOrder())
-                      .forEachOrdered(File::delete);
+                walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
             }
         }
     }
@@ -88,10 +84,10 @@ class DefaultValueOverrideTest {
         DefaultValueConfig config = loadViaConfigurations();
 
         // These fields are missing from the partial config, so field defaults should persist
-        assertTrue(config.enabled);   // default: true
-        assertFalse(config.debug);    // default: false
-        assertTrue(config.verbose);   // default: true
-        assertEquals(3000, config.port);  // default: 3000
+        assertTrue(config.enabled); // default: true
+        assertFalse(config.debug); // default: false
+        assertTrue(config.verbose); // default: true
+        assertEquals(3000, config.port); // default: 3000
         assertEquals(0.75, config.ratio); // default: 0.75
         // This field IS in the partial config
         assertEquals("partial-config", config.name);
@@ -104,9 +100,9 @@ class DefaultValueOverrideTest {
         // No config file exists — Configurations will create one from the init value (DefaultValueConfig::new)
         DefaultValueConfig config = loadViaConfigurations();
 
-        assertTrue(config.enabled);   // default: true
-        assertFalse(config.debug);    // default: false
-        assertTrue(config.verbose);   // default: true
+        assertTrue(config.enabled); // default: true
+        assertFalse(config.debug); // default: false
+        assertTrue(config.verbose); // default: true
         assertEquals("default-name", config.name);
         assertEquals(3000, config.port);
         assertEquals(0.75, config.ratio);
@@ -176,8 +172,8 @@ class DefaultValueOverrideTest {
 
     private DefaultValueConfig loadViaConfigurations() {
         Configurations<DefaultValueConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
-                                                                .setBase(BASE)
-                                                                .build();
+                .setBase(BASE)
+                .build();
         return conf.main();
     }
 }

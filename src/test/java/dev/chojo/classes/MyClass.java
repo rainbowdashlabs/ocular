@@ -14,12 +14,10 @@ public final class MyClass {
     private String name;
     private int age;
 
-    public MyClass() {
-    }
+    public MyClass() {}
 
     @JsonCreator
-    public MyClass(@JsonProperty("name") String name,
-                   @JsonProperty("age") int age) {
+    public MyClass(@JsonProperty("name") String name, @JsonProperty("age") int age) {
         this.name = name;
         this.age = age;
     }
@@ -45,8 +43,7 @@ public final class MyClass {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (MyClass) obj;
-        return Objects.equals(this.name, that.name) &&
-                Objects.equals(this.age, that.age);
+        return Objects.equals(this.name, that.name) && Objects.equals(this.age, that.age);
     }
 
     @Override
@@ -56,10 +53,6 @@ public final class MyClass {
 
     @Override
     public String toString() {
-        return "SerializableRecord[" +
-                "name=" + name + ", " +
-                "age=" + age + ']';
+        return "SerializableRecord[" + "name=" + name + ", " + "age=" + age + ']';
     }
-
-
 }

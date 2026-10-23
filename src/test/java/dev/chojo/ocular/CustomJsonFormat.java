@@ -11,26 +11,20 @@ import tools.jackson.databind.json.JsonMapper;
 public class CustomJsonFormat extends JsonDataFormat {
 
     @Override
-    public void configure(JsonMapper.Builder mapper) {
-    }
+    public void configure(JsonMapper.Builder mapper) {}
 
     @Override
-    public void configureWriter(JsonMapper.Builder mapper) {
-    }
+    public void configureWriter(JsonMapper.Builder mapper) {}
 
     @Override
-    public void configureWriter(JsonMapper mapper) {
-    }
+    public void configureWriter(JsonMapper mapper) {}
 
     @Override
-    public void configureReader(JsonMapper.Builder mapper) {
-    }
+    public void configureReader(JsonMapper.Builder mapper) {}
 
     @Override
-    public void configureReader(JsonMapper mapper) {
-    }
+    public void configureReader(JsonMapper mapper) {}
 
     @Override
-    public void configure(JsonMapper mapper) {
-    }
+    public void configure(JsonMapper mapper) {}
 }

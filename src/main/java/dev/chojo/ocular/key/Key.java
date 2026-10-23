@@ -27,8 +27,8 @@ import java.util.function.Supplier;
  *                    {@code configClazz}.
  * @param <T>         type of file class
  */
-public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> initValue, boolean strict,
-                     String rootPackage) {
+public record Key<T>(
+        String name, Path path, Class<T> configClazz, Supplier<T> initValue, boolean strict, String rootPackage) {
 
     /**
      * Creates a key whose root package is the package of the config class.
@@ -89,5 +89,4 @@ public record Key<T>(String name, Path path, Class<T> configClazz, Supplier<T> i
     public String toString() {
         return "%s (%s | %s)".formatted(name, path.toString(), configClazz.getSimpleName());
     }
-
 }

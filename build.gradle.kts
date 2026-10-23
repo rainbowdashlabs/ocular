@@ -5,18 +5,20 @@ import com.vanniktech.maven.publish.SourcesJar
 plugins {
     java
     `java-library`
-    id("de.chojo.publishdata") version "1.4.0"
+    alias(libs.plugins.publishdata)
     alias(libs.plugins.spotless)
-    id("com.vanniktech.maven.publish") version "0.37.0"
+    alias(libs.plugins.vanniktech)
 }
 
 publishData {
-    useEldoNexusRepos(false)
-    publishingVersion = "2.3.1"
+    eldoNexus(dev = false)
+    channels {
+        clear()
+        release("https://eldonexus.de/repository/maven-releases/") { publishToMavenCentral() }
+        snapshot("https://eldonexus.de/repository/maven-snapshots/")
+    }
 }
 
-group = "dev.chojo"
-version = publishData.getVersion()
 description =
     "Wrapper library around jackson to manage configuration files. Supporting different formats and allows high customization with reasonable defaults to start right away."
 
@@ -25,49 +27,55 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j", "slf4j-api", "2.0.20")
-    compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
-    annotationProcessor("org.jetbrains:annotations:26.1.0") // to avoid warnings if any
-    api("tools.jackson.core", "jackson-databind") {
-        version {
-            require("3.0.0")
-            prefer("3.1.1")
-        }
-    }
-    compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
-    compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
+    compileOnly(libs.slf4j.api)
+    compileOnlyApi(libs.annotations)
+    annotationProcessor(libs.annotations)
+    api(libs.jackson.databind)
+    compileOnly(libs.jackson.yaml)
+    compileOnly(libs.jackson.toml)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:6.1.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.1.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.1.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.launcher)
     testAnnotationProcessor(sourceSets.main.get().output)
-    testImplementation("org.jetbrains", "annotations", "26.1.0")
-    testImplementation("org.slf4j", "slf4j-api", "2.0.20")
-    testImplementation("org.slf4j", "slf4j-simple", "2.0.20")
-    testImplementation("tools.jackson.dataformat", "jackson-dataformat-yaml")
-    testImplementation("tools.jackson.dataformat", "jackson-dataformat-toml")
-    testImplementation("de.eldoria.jacksonbukkit", "paper", "2.0.0")
+    testImplementation(libs.annotations)
+    testImplementation(libs.slf4j.api)
+    testImplementation(libs.slf4j.simple)
+    testImplementation(libs.jackson.yaml)
+    testImplementation(libs.jackson.toml)
+    testImplementation(libs.jacksonbukkit.paper)
 }
 
 spotless {
     java {
+        target("src/**/*.java")
         licenseHeaderFile(rootProject.file("HEADER.txt"))
-        target("**/*.java")
+        palantirJavaFormat(libs.versions.palantir.get()).formatJavadoc(false)
+        removeUnusedImports()
+        importOrder("", "java", "javax", "\\#")
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion = JavaLanguageVersion.of(25)
     }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release = 21
+    options.encoding = "UTF-8"
+}
+
+tasks.withType<Javadoc>().configureEach {
+    (options as StandardJavadocDocletOptions).links("https://docs.oracle.com/en/java/javase/21/docs/api/")
 }
 
 mavenPublishing{
     signAllPublications()
     publishToMavenCentral()
-
-    coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
 
     pom{
         name.set("Ocular")
@@ -76,8 +84,8 @@ mavenPublishing{
         url.set("https://github.com/rainbowdashlabs/ocular")
         licenses {
             license {
-                name.set("LGPL-3.0")
-                url.set("https://opensource.org/license/lgpl-3-0")
+                name.set("LGPL-3.0-or-later")
+                url.set("https://www.gnu.org/licenses/lgpl-3.0.html")
             }
         }
 
@@ -93,7 +101,7 @@ mavenPublishing{
         scm{
             url.set("https://github.com/rainbowdashlabs/ocular")
             connection.set("scm:git:git://github.com/rainbowdashlabs/ocular.git")
-            developerConnection.set("scm:git:ssh://github.com/racinbowdashlabs/ocular.git")
+            developerConnection.set("scm:git:ssh://github.com/rainbowdashlabs/ocular.git")
         }
     }
 
@@ -107,22 +115,17 @@ mavenPublishing{
 
 tasks {
     test {
-        dependsOn(spotlessCheck)
         useJUnitPlatform()
         testLogging {
             events("passed", "skipped", "failed")
         }
     }
 
-    compileJava {
-        dependsOn(spotlessApply)
-    }
-
     register<Copy>("copyOverrideReference") {
         description = "Copies the generated override reference file to build/ocular/"
-        from(fileTree(layout.buildDirectory) {
-            include("**/META-INF/ocular/overrides.md")
-        })
+        from(sourceSets.main.get().output.classesDirs + sourceSets.test.get().output.classesDirs) {
+            include("META-INF/ocular/overrides.md")
+        }
         eachFile {
             relativePath = RelativePath(true, name)
         }

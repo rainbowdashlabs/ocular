@@ -1,0 +1,26 @@
+[versions]
+spotless = "8.10.4"
+palantir = "2.102.0"
+vanniktech = "0.37.0"
+publishdata = "2.1.0"
+slf4j = "2.0.20"
+annotations = "26.1.0"
+junit = "6.1.3"
+jacksonbukkit = "2.0.0"
+
+[libraries]
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version = { require = "3.0.0", prefer = "3.1.1" } }
+jackson-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml" }
+jackson-toml = { module = "tools.jackson.dataformat:jackson-dataformat-toml" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+jacksonbukkit-paper = { module = "de.eldoria.jacksonbukkit:paper", version.ref = "jacksonbukkit" }
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+vanniktech = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
+publishdata = { id = "de.chojo.publishdata", version.ref = "publishdata" }

@@ -27,8 +27,7 @@ class OverrideApplierTest {
                 "name", "overridden",
                 "count", "42",
                 "active", "true",
-                "rate", "3.14"
-        ));
+                "rate", "3.14"));
 
         OverrideApplier.applyOverrides(target, supplier);
 
@@ -43,8 +42,7 @@ class OverrideApplierTest {
         MethodTarget target = new MethodTarget();
         MapSupplier supplier = new MapSupplier(Map.of(
                 "name", "via-method",
-                "count", "99"
-        ));
+                "count", "99"));
 
         OverrideApplier.applyOverrides(target, supplier);
 
@@ -117,7 +115,7 @@ class OverrideApplierTest {
 
         OverrideApplier.applyOverrides(target, supplier);
 
-        assertArrayEquals(new String[]{"a", "b", "c"}, target.tags);
+        assertArrayEquals(new String[] {"a", "b", "c"}, target.tags);
     }
 
     @Test
@@ -127,7 +125,7 @@ class OverrideApplierTest {
 
         OverrideApplier.applyOverrides(target, supplier);
 
-        assertArrayEquals(new int[]{1, 2, 3}, target.numbers);
+        assertArrayEquals(new int[] {1, 2, 3}, target.numbers);
     }
 
     @Test
@@ -216,12 +214,11 @@ class OverrideApplierTest {
         MapSupplier supplier = new MapSupplier(Map.of(
                 "levelArray", "info,WARN",
                 "levelList", "ERROR,info",
-                "levelSet", "warn,error"
-        ));
+                "levelSet", "warn,error"));
 
         OverrideApplier.applyOverrides(target, supplier);
 
-        assertArrayEquals(new Level[]{Level.INFO, Level.WARN}, target.levelArray);
+        assertArrayEquals(new Level[] {Level.INFO, Level.WARN}, target.levelArray);
         assertEquals(List.of(Level.ERROR, Level.INFO), target.levelList);
         assertEquals(Set.of(Level.WARN, Level.ERROR), target.levelSet);
     }
@@ -237,11 +234,14 @@ class OverrideApplierTest {
     }
 
     enum Level {
-        INFO, WARN, ERROR
+        INFO,
+        WARN,
+        ERROR
     }
 
     enum Mode {
-        LENIENT, STRICT
+        LENIENT,
+        STRICT
     }
 
     static class EnumTarget {

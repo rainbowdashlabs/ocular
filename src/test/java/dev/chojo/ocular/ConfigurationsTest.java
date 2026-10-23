@@ -26,12 +26,15 @@ import java.util.Comparator;
 
 class ConfigurationsTest {
 
-    public static final Key<MyClass> JSON = Key.builder(Path.of("main.json"), () -> new MyClass("Lilly", 20)).build();
-    public static final Key<MyClass> YAML = Key.builder(Path.of("main.yaml"), () -> new MyClass("Lilly", 20)).build();
-    public static final Key<MyClass> YML = Key.builder(Path.of("main.yml"), () -> new MyClass("Lilly", 20)).build();
-    public static final Key<MyClass> TOML = Key.builder(Path.of("main.toml"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> JSON =
+            Key.builder(Path.of("main.json"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> YAML =
+            Key.builder(Path.of("main.yaml"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> YML =
+            Key.builder(Path.of("main.yml"), () -> new MyClass("Lilly", 20)).build();
+    public static final Key<MyClass> TOML =
+            Key.builder(Path.of("main.toml"), () -> new MyClass("Lilly", 20)).build();
     public static final Path BASE = Path.of("configbase");
-
 
     @BeforeEach
     void setUp() throws IOException {
@@ -45,35 +48,35 @@ class ConfigurationsTest {
     void tearDown() throws IOException {
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
-                walker.map(Path::toFile)
-                      .sorted(Comparator.reverseOrder())
-                      .forEachOrdered(File::delete);
+                walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
             }
         }
     }
 
     @Test
     void strictKeysLeaveUnreadableFilesUntouched() throws IOException {
-        Key<MyClass> strict = Key.builder(Path.of("strict.json"), () -> new MyClass("Lilly", 20)).strict().build();
+        Key<MyClass> strict = Key.builder(Path.of("strict.json"), () -> new MyClass("Lilly", 20))
+                .strict()
+                .build();
         Files.writeString(BASE.resolve("strict.json"), "{ not json");
-        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+        Configurations<MyClass> conf =
+                Configurations.builder(JSON, new JsonDataFormat()).setBase(BASE).build();
 
         Assertions.assertThrows(ConfigurationException.class, () -> conf.secondary(strict));
         Assertions.assertEquals("{ not json", Files.readString(BASE.resolve("strict.json")));
         try (var files = Files.list(BASE)) {
-            Assertions.assertTrue(files.noneMatch(file -> file.getFileName().toString().startsWith("backup_")));
+            Assertions.assertTrue(
+                    files.noneMatch(file -> file.getFileName().toString().startsWith("backup_")));
         }
     }
 
     @Test
     void lenientKeysReplaceUnreadableFiles() throws IOException {
-        Key<MyClass> lenient = Key.builder(Path.of("lenient.json"), () -> new MyClass("Lilly", 20)).build();
+        Key<MyClass> lenient = Key.builder(Path.of("lenient.json"), () -> new MyClass("Lilly", 20))
+                .build();
         Files.writeString(BASE.resolve("lenient.json"), "{ not json");
-        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+        Configurations<MyClass> conf =
+                Configurations.builder(JSON, new JsonDataFormat()).setBase(BASE).build();
 
         Assertions.assertNotNull(conf.secondary(lenient));
         Assertions.assertNotEquals("{ not json", Files.readString(BASE.resolve("lenient.json")));
@@ -81,9 +84,8 @@ class ConfigurationsTest {
 
     @Test
     void checkMainFileCreation() {
-        Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+        Configurations<MyClass> conf =
+                Configurations.builder(JSON, new JsonDataFormat()).setBase(BASE).build();
         conf.main();
         conf.save();
         Assertions.assertTrue(Files.exists(BASE.resolve(JSON.path())));
@@ -92,9 +94,9 @@ class ConfigurationsTest {
     @Test
     void checkSecondaryFileCreation() {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
         conf.secondary(YAML);
         conf.save();
         Assertions.assertTrue(Files.exists(BASE.resolve(YAML.path())));
@@ -103,9 +105,9 @@ class ConfigurationsTest {
     @Test
     void checkReload() {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
         MyClass secondary = conf.secondary(YAML);
         secondary.age(19);
         conf.save();
@@ -116,9 +118,9 @@ class ConfigurationsTest {
     @Test
     void loadUnsupportedFormat() {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
 
         Assertions.assertThrows(UnknownFormatException.class, () -> conf.secondary(TOML));
     }
@@ -126,9 +128,9 @@ class ConfigurationsTest {
     @Test
     void exists() {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
         Assertions.assertFalse(conf.exists(JSON));
         conf.main();
         Assertions.assertTrue(conf.exists(JSON));
@@ -137,14 +139,14 @@ class ConfigurationsTest {
     @Test
     void loaded() {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
         conf.main();
         conf = Configurations.builder(JSON, new JsonDataFormat())
-                             .addFormat(new YamlDataFormat())
-                             .setBase(BASE)
-                             .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
         Assertions.assertTrue(conf.exists(JSON));
         Assertions.assertFalse(conf.loaded(JSON));
         conf.main();
@@ -154,9 +156,9 @@ class ConfigurationsTest {
     @Test
     void migrate() {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat())
-                                                     .addFormat(new YamlDataFormat())
-                                                     .setBase(BASE)
-                                                     .build();
+                .addFormat(new YamlDataFormat())
+                .setBase(BASE)
+                .build();
         MyClass yaml = conf.secondary(YAML);
         yaml.age(19);
         conf.migrate(YAML, YML);
@@ -169,8 +171,8 @@ class ConfigurationsTest {
     @Test
     void checkPrettyJsonFormat() throws IOException {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat(true))
-                                                     .setBase(BASE)
-                                                     .build();
+                .setBase(BASE)
+                .build();
 
         conf.main();
         conf.save();
@@ -178,7 +180,7 @@ class ConfigurationsTest {
         Assertions.assertTrue(BASE.resolve(JSON.path()).toFile().exists());
         String json = Files.readString(BASE.resolve(JSON.path()));
 
-        // The reason we use .lines() here is because of OS specific differences in line separators (LF & CRLF) 
+        // The reason we use .lines() here is because of OS specific differences in line separators (LF & CRLF)
         Assertions.assertLinesMatch("""
                 {
                   "name" : "Lilly",
@@ -190,8 +192,8 @@ class ConfigurationsTest {
     @Test
     void checkNonPrettyJsonFormat() throws IOException {
         Configurations<MyClass> conf = Configurations.builder(JSON, new JsonDataFormat(false))
-                                                     .setBase(BASE)
-                                                     .build();
+                .setBase(BASE)
+                .build();
 
         conf.main();
         conf.save();
@@ -202,27 +204,29 @@ class ConfigurationsTest {
         Assertions.assertEquals("{\"name\":\"Lilly\",\"age\":20}", json);
     }
 
-//    void example() {
-//        Key<MyClass> mainConfig = Key.builder(Path.of("config.json"), MyClass::new).build();
-//        Configurations<MyClass> conf = Configurations.builder(
-//                                                             mainConfig,
-//                                                             new JsonDataFormat())
-//                                                     .addFormat(new YamlDataFormat())
-//                                                     .setBase(Path.of("configurations"))
-//                                                     .configureBuilder()
-//                                                     .configureMapper()
-//                                                     .configureReaderBuilder()
-//                                                     .configureReaderMapper()
-//                                                     .configureWriterBuilder()
-//                                                     .configureWriterMapper()
-//                                                     .build();
-//    }
+    //    void example() {
+    //        Key<MyClass> mainConfig = Key.builder(Path.of("config.json"), MyClass::new).build();
+    //        Configurations<MyClass> conf = Configurations.builder(
+    //                                                             mainConfig,
+    //                                                             new JsonDataFormat())
+    //                                                     .addFormat(new YamlDataFormat())
+    //                                                     .setBase(Path.of("configurations"))
+    //                                                     .configureBuilder()
+    //                                                     .configureMapper()
+    //                                                     .configureReaderBuilder()
+    //                                                     .configureReaderMapper()
+    //                                                     .configureWriterBuilder()
+    //                                                     .configureWriterMapper()
+    //                                                     .build();
+    //    }
 
     void exampleJacksonBukkit() {
-        Key<MyClass> mainConfig = Key.builder(Path.of("config.yml"), MyClass::new).build();
+        Key<MyClass> mainConfig =
+                Key.builder(Path.of("config.yml"), MyClass::new).build();
         Configurations.builder(mainConfig, new YamlDataFormat())
-                      .withClassLoader(this.getClass().getClassLoader()) // For minecraft its important to pass the classloader
-                      .addModule(new JacksonPaper())
-                      .build();
+                .withClassLoader(
+                        this.getClass().getClassLoader()) // For minecraft its important to pass the classloader
+                .addModule(new JacksonPaper())
+                .build();
     }
 }

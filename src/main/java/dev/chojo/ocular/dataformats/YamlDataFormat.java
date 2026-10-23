@@ -17,8 +17,7 @@ public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder
     }
 
     public void configure(YAMLMapper.Builder yaml) {
-        yaml.disable(YAMLWriteFeature.USE_NATIVE_TYPE_ID)
-            .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER);
+        yaml.disable(YAMLWriteFeature.USE_NATIVE_TYPE_ID).disable(YAMLWriteFeature.WRITE_DOC_START_MARKER);
     }
 
     @Override
@@ -28,7 +27,7 @@ public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder
 
     @Override
     public String[] typeAlias() {
-        return new String[]{"yml"};
+        return new String[] {"yml"};
     }
 
     @Override

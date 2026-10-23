@@ -8,6 +8,15 @@ package dev.chojo.ocular.processor;
 import dev.chojo.ocular.override.Overwrite;
 import dev.chojo.ocular.override.OverwritePrefix;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -26,14 +35,6 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Compile-time annotation processor that generates override helper classes for configuration objects.
@@ -96,7 +97,10 @@ public class OcularProcessor extends AbstractProcessor {
         // If multiple lookups target the same field, the first non-null one wins (later lookups are skipped).
         out.beginBlock("{");
         out.println("String value = {};", lookupExpression);
-        out.println("if (value != null && !overrides.containsKey(\"{}\")) overrides.put(\"{}\", value);", fieldName, fieldName);
+        out.println(
+                "if (value != null && !overrides.containsKey(\"{}\")) overrides.put(\"{}\", value);",
+                fieldName,
+                fieldName);
         out.endBlock();
     }
 
@@ -126,7 +130,9 @@ public class OcularProcessor extends AbstractProcessor {
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Overwrite.class)) {
             TypeElement enclosingClass = (TypeElement) element.getEnclosingElement();
-            classesToProcess.computeIfAbsent(enclosingClass, k -> new ArrayList<>()).add(element);
+            classesToProcess
+                    .computeIfAbsent(enclosingClass, k -> new ArrayList<>())
+                    .add(element);
         }
 
         // Collect override info for the reference file
@@ -138,8 +144,10 @@ public class OcularProcessor extends AbstractProcessor {
                 List<OverrideInfo> infos = generateOverrideProvider(entry.getKey(), entry.getValue());
                 allOverrides.put(entry.getKey().getQualifiedName().toString(), infos);
             } catch (IOException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR,
-                        "Could not generate override provider for " + entry.getKey().getQualifiedName() + ": " + e.getMessage());
+                messager.printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Could not generate override provider for "
+                                + entry.getKey().getQualifiedName() + ": " + e.getMessage());
             }
         }
 
@@ -148,8 +156,8 @@ public class OcularProcessor extends AbstractProcessor {
             try {
                 generateOverrideDocumentation(allOverrides);
             } catch (IOException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR,
-                        "Could not generate override documentation: " + e.getMessage());
+                messager.printMessage(
+                        Diagnostic.Kind.ERROR, "Could not generate override documentation: " + e.getMessage());
             }
         }
 
@@ -159,8 +167,7 @@ public class OcularProcessor extends AbstractProcessor {
     /**
      * Holds information about a single override for documentation and logging purposes.
      */
-    private record OverrideInfo(String fieldName, String description, List<String> sources) {
-    }
+    private record OverrideInfo(String fieldName, String description, List<String> sources) {}
 
     /**
      * Generates a Markdown reference file at {@code META-INF/ocular/overrides.md} listing all
@@ -200,9 +207,12 @@ public class OcularProcessor extends AbstractProcessor {
      *   <li>A {@code getValue()} method that looks up a field name in the map.</li>
      * </ul>
      */
-    private List<OverrideInfo> generateOverrideProvider(TypeElement typeElement, List<Element> elements) throws IOException {
+    private List<OverrideInfo> generateOverrideProvider(TypeElement typeElement, List<Element> elements)
+            throws IOException {
         // Extract the package (e.g. "com.example") so we can put the generated file in the same package
-        String packageName = ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString();
+        String packageName = ((PackageElement) typeElement.getEnclosingElement())
+                .getQualifiedName()
+                .toString();
         // Full name like "com.example.MyConfig"
         String fullClassName = typeElement.getQualifiedName().toString();
 
@@ -218,7 +228,8 @@ public class OcularProcessor extends AbstractProcessor {
         }
         // The name of the class we're about to generate, e.g. "MyConfig_OcularOverride"
         // For inner classes like "Outer.Inner", dots become underscores: "Outer_Inner_OcularOverride"
-        String generatedClassName = fullClassName.substring(packageName.length() + 1).replace('.', '_') + "_OcularOverride";
+        String generatedClassName =
+                fullClassName.substring(packageName.length() + 1).replace('.', '_') + "_OcularOverride";
 
         // Ask the compiler to create a new .java source file. The compiler will automatically
         // compile this generated file in the same compilation round — we just need to write valid Java into it.
@@ -276,7 +287,9 @@ public class OcularProcessor extends AbstractProcessor {
      * code structure (mirrors), not the actual runtime annotation objects. Mirrors preserve the
      * declaration order of attributes, which is essential for correct precedence.
      */
-    private OverrideInfo emitLookupsInOrder(SourceWriter out, Element element, String prefix, boolean forcePrefix, String fieldName) throws IOException {
+    private OverrideInfo emitLookupsInOrder(
+            SourceWriter out, Element element, String prefix, boolean forcePrefix, String fieldName)
+            throws IOException {
         // Get the compile-time representation ("mirror") of the @Overwrite annotation on this field.
         // We need the mirror (not the annotation object) because at compile time the annotation class
         // isn't loaded as a real object — it only exists as metadata in the source code.
@@ -302,7 +315,8 @@ public class OcularProcessor extends AbstractProcessor {
             if (entry.getValue().getValue().getClass() == String.class) continue;
             // The value is an array of nested annotations (e.g. the @Prop[] or @Env[] array)
             @SuppressWarnings("unchecked")
-            List<? extends AnnotationValue> values = (List<? extends AnnotationValue>) entry.getValue().getValue();
+            List<? extends AnnotationValue> values =
+                    (List<? extends AnnotationValue>) entry.getValue().getValue();
             if ("prop".equals(attrName)) {
                 // make sure that the prefix is adjusted for whatever input format is used.
                 prefix = prefix.replace("_", ".").toLowerCase();

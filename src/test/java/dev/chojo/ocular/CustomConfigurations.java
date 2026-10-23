@@ -15,7 +15,12 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class CustomConfigurations<T> extends Configurations<T> {
-    public CustomConfigurations(Path base, @NotNull Key<T> main, List<DataFormat<?, ?>> formats, ClassLoader classLoader, Configurations<?> parent) {
+    public CustomConfigurations(
+            Path base,
+            @NotNull Key<T> main,
+            List<DataFormat<?, ?>> formats,
+            ClassLoader classLoader,
+            Configurations<?> parent) {
         super(base, main, formats, classLoader, parent);
     }
 
@@ -30,18 +35,14 @@ public class CustomConfigurations<T> extends Configurations<T> {
     }
 
     @Override
-    public void configureWriter(MapperBuilder<ObjectMapper, ?> mapper) {
-    }
+    public void configureWriter(MapperBuilder<ObjectMapper, ?> mapper) {}
 
     @Override
-    public void configureWriter(ObjectMapper mapper) {
-    }
+    public void configureWriter(ObjectMapper mapper) {}
 
     @Override
-    public void configureReader(MapperBuilder<ObjectMapper, ?> mapper) {
-    }
+    public void configureReader(MapperBuilder<ObjectMapper, ?> mapper) {}
 
     @Override
-    public void configureReader(ObjectMapper mapper) {
-    }
+    public void configureReader(ObjectMapper mapper) {}
 }
