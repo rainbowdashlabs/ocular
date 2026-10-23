@@ -136,3 +136,6 @@ public class AppConfig implements ConfigSubscriber {
 | `preWrite` | before the object is written, also when a default file is created |
 
 Both methods have empty defaults, so you only implement what you need.
+
+If `postRead` asks the same `Configurations` for the key that is being loaded right now, it gets a fresh default
+value instead of loading the file a second time.
