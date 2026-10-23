@@ -115,6 +115,7 @@ This instance reads and writes JSON and YAML files. All relative paths live in t
 | `addFormat(DataFormat)` | Registers one more data format. | Only the format passed to `builder(...)` |
 | `addFormats(List<DataFormat<?, ?>>)` | Registers several data formats at once. | |
 | `withClassLoader(ClassLoader)` | The class loader Jackson uses to find classes. | The context class loader of the current thread |
+| `parent(Configurations)` | Another instance to fall back to. A file ending none of this instance's formats matches uses the parent's format, and the parent's modules are registered too. | No parent |
 | `addModule(JacksonModule)` | Registers a Jackson module on every mapper. There is also a version that takes a collection. | No modules |
 | `configureBuilder(...)` | Changes the Jackson mapper builder. | |
 | `configureReaderBuilder(...)` | Changes the mapper builder for reading only. | |
