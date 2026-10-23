@@ -22,10 +22,6 @@ public class TomlDataFormat implements DataFormat<TomlMapper, TomlMapper.Builder
 
     @Override
     public void assertInstalled() throws MissingDataTypeInstallationException {
-        try {
-            Class.forName(TomlMapper.class.getName());
-        } catch (ClassNotFoundException e) {
-            throw new MissingDataTypeInstallationException(type(), "tools.jackson.dataformat:jackson-dataformat-toml");
-        }
+        DataFormats.requireModule(DataFormats.TOML_MAPPER, type(), DataFormats.TOML_MODULE);
     }
 }
