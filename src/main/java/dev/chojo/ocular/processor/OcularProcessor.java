@@ -275,6 +275,19 @@ public class OcularProcessor extends AbstractProcessor {
             out.println("return Optional.ofNullable(overrides.get(fieldOrMethodName));");
             out.endBlock();
 
+            out.println();
+            out.println("@Override");
+            out.beginBlock("public java.util.Map<String, java.util.List<String>> sources() {");
+            out.println("java.util.Map<String, java.util.List<String>> sources = new java.util.LinkedHashMap<>();");
+            for (OverrideInfo info : overrideInfos) {
+                String sources = info.sources().stream()
+                        .map(source -> "\"" + javaString(source.replace("`", "")) + "\"")
+                        .collect(java.util.stream.Collectors.joining(", "));
+                out.println("sources.put(\"{}\", java.util.List.of({}));", info.fieldName(), sources);
+            }
+            out.println("return sources;");
+            out.endBlock();
+
             out.endBlock();
         }
         return overrideInfos;
@@ -362,6 +375,13 @@ public class OcularProcessor extends AbstractProcessor {
             }
         }
         return new OverrideInfo(fieldName, description, sources);
+    }
+
+    /**
+     * Escapes a value for use inside a Java string literal of the generated source.
+     */
+    private static String javaString(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     /**
