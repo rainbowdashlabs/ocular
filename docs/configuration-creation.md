@@ -63,13 +63,17 @@ Ocular ships three data formats:
 See [YAML and TOML](./index.mdx#yaml-and-toml) for how to add the extra dependencies.
 
 ```java
-JsonDataFormat json = new JsonDataFormat();
-JsonDataFormat prettyJson = new JsonDataFormat(true);
-YamlDataFormat yaml = new YamlDataFormat();
-TomlDataFormat toml = new TomlDataFormat();
+JsonDataFormat json = DataFormats.json();
+JsonDataFormat prettyJson = DataFormats.json(true);
+YamlDataFormat yaml = DataFormats.yaml();
+TomlDataFormat toml = DataFormats.toml();
 ```
 
-`JsonDataFormat` writes everything on one line by default. Pass `true` to the constructor to get indented output.
+`DataFormats` checks that the module of a format is there. Without it, `DataFormats.yaml()` throws a
+`MissingDataTypeInstallationException` that names the dependency to add. Creating a format with `new YamlDataFormat()`
+works too, but then a missing module ends in a `NoClassDefFoundError`.
+
+`JsonDataFormat` writes everything on one line by default. Pass `true` to get indented output.
 
 ```json
 {
