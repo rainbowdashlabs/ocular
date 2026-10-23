@@ -7,6 +7,7 @@ package dev.chojo.ocular.exceptions;
 
 public class MissingDataTypeInstallationException extends RuntimeException {
     public MissingDataTypeInstallationException(String dataType, String module) {
-        super("Missing module for data type %s. Install %s to allow parsing of this format.".formatted(dataType, module));
+        super("Missing module for data type %s. Install %s to allow parsing of this format."
+                .formatted(dataType, module));
     }
 }

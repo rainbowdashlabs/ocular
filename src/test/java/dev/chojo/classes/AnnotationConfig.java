@@ -31,6 +31,8 @@ public class AnnotationConfig {
     public String multiEnv;
 
     // mixed multiple: prop is declared first, so it takes precedence; env vars are fallbacks
-    @Overwrite(prop = @Prop("base.prop"), env = {@Env("ENV_A"), @Env("ENV_B")})
+    @Overwrite(
+            prop = @Prop("base.prop"),
+            env = {@Env("ENV_A"), @Env("ENV_B")})
     public String mixedMultiple;
 }

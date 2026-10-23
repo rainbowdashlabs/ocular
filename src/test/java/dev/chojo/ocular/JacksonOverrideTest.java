@@ -26,9 +26,8 @@ class JacksonOverrideTest {
 
     private static final Path BASE = Path.of("jackson_test_config");
     private static final Key<JacksonOverrideConfig> CONFIG_KEY = Key.builder(
-            Path.of("config.json"),
-            () -> new JacksonOverrideConfig("localhost", 8080, false, "hello")
-    ).build();
+                    Path.of("config.json"), () -> new JacksonOverrideConfig("localhost", 8080, false, "hello"))
+            .build();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -47,9 +46,7 @@ class JacksonOverrideTest {
 
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
-                walker.map(Path::toFile)
-                      .sorted(Comparator.reverseOrder())
-                      .forEachOrdered(File::delete);
+                walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
             }
         }
     }
@@ -131,8 +128,8 @@ class JacksonOverrideTest {
 
     private JacksonOverrideConfig loadViaConfigurations() {
         Configurations<JacksonOverrideConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
-                                                                   .setBase(BASE)
-                                                                   .build();
+                .setBase(BASE)
+                .build();
         return conf.main();
     }
 }

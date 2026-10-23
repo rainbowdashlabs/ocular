@@ -18,8 +18,7 @@ public interface ConfigSubscriber {
      *
      * @param config the configuration object that has been read
      */
-    default void postRead(Configurations<?> config) {
-    }
+    default void postRead(Configurations<?> config) {}
 
     /**
      * A hook that is called before writing configurations. This method can be
@@ -28,6 +27,5 @@ public interface ConfigSubscriber {
      *
      * @param config the configuration object to be written
      */
-    default void preWrite(Configurations<?> config) {
-    }
+    default void preWrite(Configurations<?> config) {}
 }

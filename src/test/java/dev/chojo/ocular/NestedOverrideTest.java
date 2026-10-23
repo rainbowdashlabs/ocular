@@ -24,10 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NestedOverrideTest {
 
     private static final Path BASE = Path.of("nested_test_config");
-    private static final Key<NestedConfig> CONFIG_KEY = Key.builder(
-            Path.of("config.json"),
-            NestedConfig::new
-    ).build();
+    private static final Key<NestedConfig> CONFIG_KEY =
+            Key.builder(Path.of("config.json"), NestedConfig::new).build();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -45,9 +43,7 @@ class NestedOverrideTest {
 
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
-                walker.map(Path::toFile)
-                      .sorted(Comparator.reverseOrder())
-                      .forEachOrdered(File::delete);
+                walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
             }
         }
     }
@@ -85,8 +81,8 @@ class NestedOverrideTest {
 
     private NestedConfig loadViaConfigurations() {
         Configurations<NestedConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
-                                                          .setBase(BASE)
-                                                          .build();
+                .setBase(BASE)
+                .build();
         return conf.main();
     }
 }

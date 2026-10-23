@@ -23,46 +23,40 @@ public interface Configurator<M extends ObjectMapper, B extends MapperBuilder<M,
      *
      * @param mapper the mapper builder instance to be configured
      */
-    default void configure(B mapper) {
-    }
+    default void configure(B mapper) {}
 
     /**
      * Configures the given mapper instance by applying custom configurations.
      *
      * @param mapper the mapper instance to be configured
      */
-    default void configure(M mapper) {
-    }
+    default void configure(M mapper) {}
 
     /**
      * Configures the provided mapper builder for writing operations.
      *
      * @param mapper the instance of the mapper builder to configure
      */
-    default void configureWriter(B mapper) {
-    }
+    default void configureWriter(B mapper) {}
 
     /**
      * Configures the given ObjectMapper instance specifically for writing operations.
      *
      * @param mapper the ObjectMapper instance to be configured for writing
      */
-    default void configureWriter(M mapper) {
-    }
+    default void configureWriter(M mapper) {}
 
     /**
      * Configures the provided mapper builder instance for reading operations.
      *
      * @param mapper the mapper builder instance to be configured
      */
-    default void configureReader(B mapper) {
-    }
+    default void configureReader(B mapper) {}
 
     /**
      * Configures the provided ObjectMapper instance for reading.
      *
      * @param mapper the ObjectMapper instance to be configured for reading
      */
-    default void configureReader(M mapper) {
-    }
+    default void configureReader(M mapper) {}
 }

@@ -28,15 +28,11 @@ class OverwritePrefixTest {
     private static final Path PREFIX_BASE = Path.of("prefix_test_config");
     private static final Path FORCE_BASE = Path.of("force_prefix_test_config");
 
-    private static final Key<PrefixConfig> PREFIX_KEY = Key.builder(
-            Path.of("config.json"),
-            PrefixConfig::new
-    ).build();
+    private static final Key<PrefixConfig> PREFIX_KEY =
+            Key.builder(Path.of("config.json"), PrefixConfig::new).build();
 
-    private static final Key<ForcePrefixConfig> FORCE_KEY = Key.builder(
-            Path.of("config.json"),
-            ForcePrefixConfig::new
-    ).build();
+    private static final Key<ForcePrefixConfig> FORCE_KEY =
+            Key.builder(Path.of("config.json"), ForcePrefixConfig::new).build();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -56,12 +52,10 @@ class OverwritePrefixTest {
         System.clearProperty("custom.prop");
         System.clearProperty("myapp.custom.prop");
 
-        for (Path base : new Path[]{PREFIX_BASE, FORCE_BASE}) {
+        for (Path base : new Path[] {PREFIX_BASE, FORCE_BASE}) {
             if (Files.exists(base)) {
                 try (var walker = Files.walk(base)) {
-                    walker.map(Path::toFile)
-                          .sorted(Comparator.reverseOrder())
-                          .forEachOrdered(File::delete);
+                    walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
                 }
             }
         }
@@ -131,15 +125,15 @@ class OverwritePrefixTest {
 
     private PrefixConfig loadPrefix() {
         Configurations<PrefixConfig> conf = Configurations.builder(PREFIX_KEY, new JsonDataFormat())
-                                                          .setBase(PREFIX_BASE)
-                                                          .build();
+                .setBase(PREFIX_BASE)
+                .build();
         return conf.main();
     }
 
     private ForcePrefixConfig loadForce() {
         Configurations<ForcePrefixConfig> conf = Configurations.builder(FORCE_KEY, new JsonDataFormat())
-                                                               .setBase(FORCE_BASE)
-                                                               .build();
+                .setBase(FORCE_BASE)
+                .build();
         return conf.main();
     }
 }

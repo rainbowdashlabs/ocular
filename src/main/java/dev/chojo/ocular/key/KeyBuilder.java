@@ -37,7 +37,6 @@ public class KeyBuilder<T> {
         this.rootPackage = configClazz.getPackageName();
     }
 
-
     /**
      * Sets the name for the key being built.
      *

@@ -25,10 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class AnnotationOverrideTest {
 
     private static final Path BASE = Path.of("annotation_test_config");
-    private static final Key<AnnotationConfig> CONFIG_KEY = Key.builder(
-            Path.of("config.json"),
-            AnnotationConfig::new
-    ).build();
+    private static final Key<AnnotationConfig> CONFIG_KEY =
+            Key.builder(Path.of("config.json"), AnnotationConfig::new).build();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -49,9 +47,7 @@ class AnnotationOverrideTest {
 
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
-                walker.map(Path::toFile)
-                      .sorted(Comparator.reverseOrder())
-                      .forEachOrdered(File::delete);
+                walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
             }
         }
     }
@@ -174,8 +170,8 @@ class AnnotationOverrideTest {
 
     private AnnotationConfig loadViaConfigurations() {
         Configurations<AnnotationConfig> conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
-                                                              .setBase(BASE)
-                                                              .build();
+                .setBase(BASE)
+                .build();
         return conf.main();
     }
 }

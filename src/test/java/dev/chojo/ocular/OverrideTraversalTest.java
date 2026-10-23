@@ -41,23 +41,23 @@ class OverrideTraversalTest {
 
         if (Files.exists(BASE)) {
             try (var walker = Files.walk(BASE)) {
-                walker.map(Path::toFile)
-                      .sorted(Comparator.reverseOrder())
-                      .forEachOrdered(File::delete);
+                walker.map(Path::toFile).sorted(Comparator.reverseOrder()).forEachOrdered(File::delete);
             }
         }
     }
 
     @Test
     void jdkTypesOutsideTheRootPackageAreNotTraversed() {
-        TraversalConfig config = load(Key.builder(Path.of("config.json"), TraversalConfig::new).build());
+        TraversalConfig config =
+                load(Key.builder(Path.of("config.json"), TraversalConfig::new).build());
 
         assertEquals(Level.WARNING, config.level);
     }
 
     @Test
     void nestedClassOutsideTheDefaultRootPackageKeepsItsValue() {
-        TraversalConfig config = load(Key.builder(Path.of("config.json"), TraversalConfig::new).build());
+        TraversalConfig config =
+                load(Key.builder(Path.of("config.json"), TraversalConfig::new).build());
 
         assertEquals("localhost", config.database.host);
     }
@@ -65,8 +65,8 @@ class OverrideTraversalTest {
     @Test
     void widenedRootPackageAppliesNestedOverrides() {
         TraversalConfig config = load(Key.builder(Path.of("config.json"), TraversalConfig::new)
-                                         .rootPackage("dev.chojo.classes")
-                                         .build());
+                .rootPackage("dev.chojo.classes")
+                .build());
 
         assertEquals("remotehost", config.database.host);
     }
@@ -79,9 +79,8 @@ class OverrideTraversalTest {
     }
 
     private TraversalConfig load(Key<TraversalConfig> key) {
-        Configurations<TraversalConfig> conf = Configurations.builder(key, new JsonDataFormat())
-                                                             .setBase(BASE)
-                                                             .build();
+        Configurations<TraversalConfig> conf =
+                Configurations.builder(key, new JsonDataFormat()).setBase(BASE).build();
         return conf.main();
     }
 }

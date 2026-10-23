@@ -24,14 +24,14 @@ public class JacksonOverrideConfig {
 
     private String greeting;
 
-    public JacksonOverrideConfig() {
-    }
+    public JacksonOverrideConfig() {}
 
     @JsonCreator
-    public JacksonOverrideConfig(@JsonProperty("host") String host,
-                                 @JsonProperty("port") int port,
-                                 @JsonProperty("debug") boolean debug,
-                                 @JsonProperty("greeting") String greeting) {
+    public JacksonOverrideConfig(
+            @JsonProperty("host") String host,
+            @JsonProperty("port") int port,
+            @JsonProperty("debug") boolean debug,
+            @JsonProperty("greeting") String greeting) {
         this.host = host;
         this.port = port;
         this.debug = debug;
