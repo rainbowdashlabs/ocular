@@ -297,7 +297,8 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     protected VisibilityChecker visibilityChecker(VisibilityChecker visibilityChecker) {
         return visibilityChecker
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE);
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE);
     }
 
     /**
