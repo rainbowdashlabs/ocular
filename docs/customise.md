@@ -40,6 +40,10 @@ Configurations<AppConfig> configurations = Configurations.builder(main, new Json
 
 Each method keeps only the last consumer you pass. Put all settings for one hook into one consumer.
 
+There are matching hooks for the finished mapper: `configureMapper`, `configureReaderMapper` and
+`configureWriterMapper`. They run right after the mapper is built. Jackson 3 mappers can not be changed once built, so
+these hooks are for looking at the mapper, for example to log its settings. Make every change in the builder hooks.
+
 The consumers apply to every data format of this instance.
 
 ## Extend `Configurations`

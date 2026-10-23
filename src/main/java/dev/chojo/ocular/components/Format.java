@@ -45,6 +45,7 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
             configurations.configureReader((MapperBuilder<ObjectMapper, ?>) mapper);
             format.configureReader(mapper);
             M reader = mapper.build();
+            this.configure(reader);
             configurations.configureReader(reader);
             format.configureReader(reader);
             this.reader = reader;
@@ -67,8 +68,9 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
             configurations.configureWriter((MapperBuilder<ObjectMapper, ?>) mapper);
             format.configureWriter(mapper);
             M writer = mapper.build();
-            configurations.configureWriter((MapperBuilder<ObjectMapper, ?>) mapper);
-            format.configureWriter(mapper);
+            this.configure(writer);
+            configurations.configureWriter(writer);
+            format.configureWriter(writer);
             this.writer = writer;
         }
         return writer;
@@ -97,5 +99,15 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
         configurations.configure((MapperBuilder<ObjectMapper, ?>) mapper);
         mapper.addModules(configurations.additionalModules());
         mapper.addModules(format.additionalModules());
+    }
+
+    /**
+     * Passes a built mapper to the general mapper hooks of the data format and the configurations.
+     *
+     * @param mapper the built mapper
+     */
+    private void configure(M mapper) {
+        format.configure(mapper);
+        configurations.configure(mapper);
     }
 }
