@@ -11,12 +11,14 @@ plugins {
 }
 
 publishData {
-    useEldoNexusRepos(false)
-    publishingVersion = "2.3.1"
+    eldoNexus(dev = false)
+    channels {
+        clear()
+        release("https://eldonexus.de/repository/maven-releases/") { publishToMavenCentral() }
+        snapshot("https://eldonexus.de/repository/maven-snapshots/")
+    }
 }
 
-group = "dev.chojo"
-version = publishData.getVersion()
 description =
     "Wrapper library around jackson to manage configuration files. Supporting different formats and allows high customization with reasonable defaults to start right away."
 
@@ -75,8 +77,6 @@ mavenPublishing{
     signAllPublications()
     publishToMavenCentral()
 
-    coordinates(groupId = "dev.chojo", artifactId = "ocular", version = publishData.getVersion())
-
     pom{
         name.set("Ocular")
         description.set(project.description)
@@ -84,8 +84,8 @@ mavenPublishing{
         url.set("https://github.com/rainbowdashlabs/ocular")
         licenses {
             license {
-                name.set("LGPL-3.0")
-                url.set("https://opensource.org/license/lgpl-3-0")
+                name.set("LGPL-3.0-or-later")
+                url.set("https://www.gnu.org/licenses/lgpl-3.0.html")
             }
         }
 
@@ -101,7 +101,7 @@ mavenPublishing{
         scm{
             url.set("https://github.com/rainbowdashlabs/ocular")
             connection.set("scm:git:git://github.com/rainbowdashlabs/ocular.git")
-            developerConnection.set("scm:git:ssh://github.com/racinbowdashlabs/ocular.git")
+            developerConnection.set("scm:git:ssh://github.com/rainbowdashlabs/ocular.git")
         }
     }
 

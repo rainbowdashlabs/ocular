@@ -2,7 +2,6 @@
 /config/
 
 .gradle
-gradle.properties
 **/build/
 !src/**/build/
 
