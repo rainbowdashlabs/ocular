@@ -11,7 +11,6 @@ YAML or TOML, with reasonable defaults to start right away and room for customiz
 ## Requirements
 
 - Java 21 or newer
-- SLF4J (`org.slf4j:slf4j-api`) on the class path; Ocular logs through it but does not bring it
 - For YAML or TOML files, the matching Jackson 3 module: `tools.jackson.dataformat:jackson-dataformat-yaml` or
   `jackson-dataformat-toml` (Ocular brings `jackson-databind` itself)
 

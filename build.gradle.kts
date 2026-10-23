@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.slf4j.api)
+    implementation(libs.slf4j.api)
     compileOnlyApi(libs.annotations)
     annotationProcessor(libs.annotations)
     api(libs.jackson.databind)
