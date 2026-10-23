@@ -49,16 +49,16 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
     }
 
     /**
-     * Checks whether the specified key matches the type or any of the type aliases of the current data format.
+     * Checks whether the file ending of the specified key is the type or any of the type aliases of the current data format.
      *
      * @param key the key to be checked, including its underlying path.
-     * @return true if the path of the specified key ends with the type or any of its aliases; false otherwise.
+     * @return true if the file name of the specified key ends with a dot and the type or any of its aliases; false otherwise.
      */
     default boolean matches(Key<?> key) {
         String path = key.path().toString();
-        if (path.endsWith(type())) return true;
+        if (path.endsWith("." + type())) return true;
         for (String s : typeAlias()) {
-            if (path.endsWith(s)) return true;
+            if (path.endsWith("." + s)) return true;
         }
         return false;
     }
