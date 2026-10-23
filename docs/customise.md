@@ -14,7 +14,7 @@ In Jackson 3 a mapper cannot be changed once it is built, so all settings go on 
 
 Before your own settings, Ocular sets these on every mapper builder:
 
-- **Fields, not getters.** Jackson sees all fields, including private ones. `get...` methods are ignored.
+- **Fields, not getters.** Jackson sees all fields, including private ones. `get...` and `is...` methods are ignored.
 - **Enums ignore case.** `warn`, `Warn` and `WARN` all read as the constant `WARN`.
 - **Your class loader.** Jackson looks up classes with the class loader set through `withClassLoader(...)`.
 - **Your modules.** Every module added with `addModule(...)` is registered.
