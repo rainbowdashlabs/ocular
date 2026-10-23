@@ -2,36 +2,11 @@ rootProject.name = "ocular"
 
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
-        maven {
-            name = "EldoNexus"
-            url = uri("https://eldonexus.de/repository/maven-public/")
-
-        }
+        maven("https://eldonexus.de/repository/maven-public/")
     }
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version ("1.0.0")
-}
-
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-
-            // plugins
-            plugin("spotless", "com.diffplug.spotless").version("8.10.4")
-            plugin("shadow", "com.github.johnrengelman.shadow").version("8.1.1")
-
-            version("slf4j", "2.0.20")
-            library("slf4j-api", "org.slf4j", "slf4j-api").versionRef("slf4j")
-        }
-
-        create("testlibs") {
-            version("slf4j", "2.0.20")
-            library("slf4j-noop", "org.slf4j", "slf4j-nop").versionRef("slf4j")
-            library("slf4j-simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
-        }
-    }
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }

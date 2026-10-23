@@ -5,9 +5,9 @@ import com.vanniktech.maven.publish.SourcesJar
 plugins {
     java
     `java-library`
-    id("de.chojo.publishdata") version "1.4.0"
+    alias(libs.plugins.publishdata)
     alias(libs.plugins.spotless)
-    id("com.vanniktech.maven.publish") version "0.37.0"
+    alias(libs.plugins.vanniktech)
 }
 
 publishData {
@@ -25,29 +25,23 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.slf4j", "slf4j-api", "2.0.20")
-    compileOnlyApi("org.jetbrains", "annotations", "26.1.0")
-    annotationProcessor("org.jetbrains:annotations:26.1.0") // to avoid warnings if any
-    api("tools.jackson.core", "jackson-databind") {
-        version {
-            require("3.0.0")
-            prefer("3.1.1")
-        }
-    }
-    compileOnly("tools.jackson.dataformat", "jackson-dataformat-yaml")
-    compileOnly("tools.jackson.dataformat", "jackson-dataformat-toml")
+    compileOnly(libs.slf4j.api)
+    compileOnlyApi(libs.annotations)
+    annotationProcessor(libs.annotations)
+    api(libs.jackson.databind)
+    compileOnly(libs.jackson.yaml)
+    compileOnly(libs.jackson.toml)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:6.1.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.1.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:6.1.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.launcher)
     testAnnotationProcessor(sourceSets.main.get().output)
-    testImplementation("org.jetbrains", "annotations", "26.1.0")
-    testImplementation("org.slf4j", "slf4j-api", "2.0.20")
-    testImplementation("org.slf4j", "slf4j-simple", "2.0.20")
-    testImplementation("tools.jackson.dataformat", "jackson-dataformat-yaml")
-    testImplementation("tools.jackson.dataformat", "jackson-dataformat-toml")
-    testImplementation("de.eldoria.jacksonbukkit", "paper", "2.0.0")
+    testImplementation(libs.annotations)
+    testImplementation(libs.slf4j.api)
+    testImplementation(libs.slf4j.simple)
+    testImplementation(libs.jackson.yaml)
+    testImplementation(libs.jackson.toml)
+    testImplementation(libs.jacksonbukkit.paper)
 }
 
 spotless {
