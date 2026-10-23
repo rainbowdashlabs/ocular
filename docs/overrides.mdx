@@ -255,10 +255,8 @@ Key<AppConfig> key = Key.builder(Path.of("config.yml"), AppConfig::new)
         .build();
 ```
 
-:::warning
-Put every class that uses `@Overwrite` into its own file. The annotation processor fails on classes nested inside
-another class, for example a `public static class Database` inside `AppConfig`.
-:::
+Classes nested inside another class work too, for example a `public static class Database` inside `AppConfig`.
+Their default prefix is their own simple name, `database`.
 
 ## Reference file
 

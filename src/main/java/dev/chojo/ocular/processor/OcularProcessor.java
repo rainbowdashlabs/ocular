@@ -29,7 +29,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -210,7 +209,9 @@ public class OcularProcessor extends AbstractProcessor {
     private List<OverrideInfo> generateOverrideProvider(TypeElement typeElement, List<Element> elements)
             throws IOException {
         // Extract the package (e.g. "com.example") so we can put the generated file in the same package
-        String packageName = ((PackageElement) typeElement.getEnclosingElement())
+        String packageName = processingEnv
+                .getElementUtils()
+                .getPackageOf(typeElement)
                 .getQualifiedName()
                 .toString();
         // Full name like "com.example.MyConfig"
