@@ -62,7 +62,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class Configurations<T> implements Configurator<ObjectMapper, MapperBuilder<ObjectMapper, ?>> {
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
     private static final Logger log = getLogger(Configurations.class);
+    /**
+     * The configurations this one falls back to for data formats and modules, or {@code null}.
+     */
     protected final Configurations<?> parent;
+
     private final Path base;
     private final Key<T> main;
     private final List<Format<?, ?>> formats = new LinkedList<>();
@@ -71,6 +75,15 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     private final KeyLocks locks = new KeyLocks();
     private final Map<Object, List<AppliedOverride>> appliedOverrides = new IdentityHashMap<>();
 
+    /**
+     * Creates configurations that resolve relative key paths against the given base directory.
+     *
+     * @param base        the directory relative key paths are resolved against
+     * @param main        the key of the main configuration file
+     * @param formats     the data formats available to the keys
+     * @param classLoader the class loader used to resolve configuration types and generated override classes
+     * @param parent      the configurations to fall back to for data formats and modules, or {@code null}
+     */
     public Configurations(
             Path base,
             @NotNull Key<T> main,
@@ -280,6 +293,11 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                 .changeDefaultVisibility(this::visibilityChecker);
     }
 
+    /**
+     * Returns the directory relative key paths are resolved against.
+     *
+     * @return the base directory
+     */
     public Path base() {
         return base;
     }

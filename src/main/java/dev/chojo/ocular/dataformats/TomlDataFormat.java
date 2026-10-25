@@ -8,7 +8,15 @@ package dev.chojo.ocular.dataformats;
 import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
 import tools.jackson.dataformat.toml.TomlMapper;
 
+/**
+ * Reads and writes configuration files as TOML. Requires {@code jackson-dataformat-toml}.
+ */
 public class TomlDataFormat implements DataFormat<TomlMapper, TomlMapper.Builder> {
+
+    /**
+     * Creates a TOML format.
+     */
+    public TomlDataFormat() {}
 
     @Override
     public TomlMapper.Builder createMapper() {

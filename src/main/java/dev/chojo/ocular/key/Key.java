@@ -66,6 +66,14 @@ public record Key<T>(
         return packageName.equals(rootPackage) || !rootPackage.isEmpty() && packageName.startsWith(rootPackage + ".");
     }
 
+    /**
+     * Creates a builder for a key of the file at the given path.
+     *
+     * @param path     the path of the file, resolved against the base directory when relative
+     * @param supplier creates the initial value when the file does not exist yet; its class is the config class
+     * @param <T>      the type of the configuration
+     * @return the builder
+     */
     public static <T> KeyBuilder<T> builder(Path path, Supplier<T> supplier) {
         return new KeyBuilder<>(path, supplier);
     }

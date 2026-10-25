@@ -11,9 +11,23 @@ import dev.chojo.ocular.key.Key;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The keys that are currently locked, so a key is not loaded twice at the same time.
+ */
 public class KeyLocks {
     private final Set<Key<?>> keys = new HashSet<>();
 
+    /**
+     * Creates an empty set of locks.
+     */
+    public KeyLocks() {}
+
+    /**
+     * Locks the key if it is not locked yet.
+     *
+     * @param key the key to lock
+     * @return the lock, or {@code null} if the key is already locked
+     */
     public synchronized KeyLock tryLock(Key<?> key) {
         if (!keys.add(key)) {
             return null;
@@ -21,6 +35,13 @@ public class KeyLocks {
         return new KeyLock(key, this);
     }
 
+    /**
+     * Locks the key.
+     *
+     * @param key the key to lock
+     * @return the lock
+     * @throws ParallelAccessException if the key is already locked
+     */
     public synchronized KeyLock lock(Key<?> key) {
         if (!keys.add(key)) {
             throw new ParallelAccessException();

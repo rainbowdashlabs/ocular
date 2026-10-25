@@ -207,6 +207,11 @@ public class ConfigurationsBuilder<T> {
         return this;
     }
 
+    /**
+     * Builds the configurations from the settings of this builder.
+     *
+     * @return the configurations
+     */
     public Configurations<T> build() {
         return new ModifyableConfigurations<>(
                 base,

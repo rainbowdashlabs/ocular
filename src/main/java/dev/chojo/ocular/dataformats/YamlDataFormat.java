@@ -9,7 +9,16 @@ import dev.chojo.ocular.exceptions.MissingDataTypeInstallationException;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
+/**
+ * Reads and writes configuration files as YAML, matching the file endings {@code yaml} and {@code yml}. Requires
+ * {@code jackson-dataformat-yaml}.
+ */
 public class YamlDataFormat implements DataFormat<YAMLMapper, YAMLMapper.Builder> {
+
+    /**
+     * Creates a YAML format.
+     */
+    public YamlDataFormat() {}
 
     @Override
     public YAMLMapper.Builder createMapper() {

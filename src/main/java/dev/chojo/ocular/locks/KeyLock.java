@@ -9,6 +9,9 @@ import dev.chojo.ocular.key.Key;
 
 import java.io.Closeable;
 
+/**
+ * A lock held on a key while it loads. Closing it releases the key.
+ */
 public class KeyLock implements Closeable {
     private final Key<?> key;
     private final KeyLocks locks;

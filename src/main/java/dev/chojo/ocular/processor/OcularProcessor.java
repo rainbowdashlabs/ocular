@@ -75,6 +75,11 @@ public class OcularProcessor extends AbstractProcessor {
     private Filer filer;
     // The Messager lets us print errors/warnings that show up in the compiler output (like javac warnings).
     private Messager messager;
+
+    /**
+     * Creates the processor. Called by the compiler through the service loader.
+     */
+    public OcularProcessor() {}
     /**
      * Overrides found in every round, written to the reference file once the last round is done.
      */

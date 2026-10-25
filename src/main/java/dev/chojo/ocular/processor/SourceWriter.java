@@ -27,17 +27,28 @@ public class SourceWriter implements AutoCloseable {
     private int indent;
     private String indentString;
 
+    /**
+     * Creates a writer that writes generated source to the given writer.
+     *
+     * @param writer the target of the generated source
+     */
     public SourceWriter(Writer writer) {
         this.writer = writer;
         this.indent = 0;
         this.indentString = "";
     }
 
+    /**
+     * Indents the following lines one level deeper.
+     */
     public void incrementIndent() {
         indent++;
         indentString = INDENT_UNIT.repeat(indent);
     }
 
+    /**
+     * Indents the following lines one level less, never below zero.
+     */
     public void decrementIndent() {
         if (indent > 0) {
             indent--;
@@ -48,6 +59,10 @@ public class SourceWriter implements AutoCloseable {
     /**
      * Prints an indented line with optional format arguments, followed by a newline.
      * Use {@code {}} as placeholder (replaced by {@code %s} internally).
+     *
+     * @param format the line with {@code {}} placeholders
+     * @param args   the values for the placeholders
+     * @throws IOException if the underlying writer fails
      */
     public void println(String format, Object... args) throws IOException {
         String line = format.replace("{}", "%s").formatted(args);
@@ -60,6 +75,8 @@ public class SourceWriter implements AutoCloseable {
 
     /**
      * Prints an empty line.
+     *
+     * @throws IOException if the underlying writer fails
      */
     public void println() throws IOException {
         writer.append("\n");
@@ -68,6 +85,10 @@ public class SourceWriter implements AutoCloseable {
     /**
      * Opens a block: prints the line and increments indent.
      * E.g. {@code beginBlock("public class Foo {")}} prints the line then indents.
+     *
+     * @param format the opening line with {@code {}} placeholders
+     * @param args   the values for the placeholders
+     * @throws IOException if the underlying writer fails
      */
     public void beginBlock(String format, Object... args) throws IOException {
         println(format, args);
@@ -77,6 +98,9 @@ public class SourceWriter implements AutoCloseable {
     /**
      * Closes a block: decrements indent and prints the closing line.
      * E.g. {@code endBlock("}")} un-indents then prints {@code }}.
+     *
+     * @param line the closing line
+     * @throws IOException if the underlying writer fails
      */
     public void endBlock(String line) throws IOException {
         decrementIndent();
@@ -85,6 +109,8 @@ public class SourceWriter implements AutoCloseable {
 
     /**
      * Shorthand for {@code endBlock("}")}.
+     *
+     * @throws IOException if the underlying writer fails
      */
     public void endBlock() throws IOException {
         endBlock("}");

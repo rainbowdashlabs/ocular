@@ -25,6 +25,12 @@ public class Format<M extends ObjectMapper, B extends MapperBuilder<M, B>> {
     private ObjectMapper reader;
     private ObjectMapper writer;
 
+    /**
+     * Creates a format whose mappers are configured by the given configurations.
+     *
+     * @param format         the data format that creates and configures the mappers
+     * @param configurations the configurations that apply their mapper settings and modules
+     */
     public Format(DataFormat<M, B> format, Configurations<?> configurations) {
         this.format = format;
         this.configurations = configurations;

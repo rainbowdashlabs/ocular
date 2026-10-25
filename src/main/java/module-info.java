@@ -1,3 +1,7 @@
+/**
+ * Ocular loads, saves and reloads configuration files with Jackson, and overrides their values from environment
+ * variables and system properties.
+ */
 module dev.chojo.ocular {
     requires com.fasterxml.jackson.annotation;
     requires java.compiler;

@@ -32,6 +32,8 @@ import java.lang.annotation.Target;
 public @interface Prop {
     /**
      * The system property name to read. Leave empty to use the auto-derived name.
+     *
+     * @return the system property name, or an empty string for the derived one
      */
     String value() default "";
 }

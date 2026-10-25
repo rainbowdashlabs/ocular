@@ -13,4 +13,9 @@ package dev.chojo.ocular.exceptions;
  * {@code KeyLocks} class when an attempt is made to acquire a lock on a {@code Key}
  * that is already locked by another process or thread.
  */
-public class ParallelAccessException extends RuntimeException {}
+public class ParallelAccessException extends RuntimeException {
+    /**
+     * Creates the exception.
+     */
+    public ParallelAccessException() {}
+}

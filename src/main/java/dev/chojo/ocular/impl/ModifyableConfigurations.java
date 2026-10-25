@@ -18,6 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Configurations that apply the mapper hooks and modules registered on a {@link dev.chojo.ocular.ConfigurationsBuilder}.
+ *
+ * @param <T> the type of the main configuration
+ */
 public class ModifyableConfigurations<T> extends Configurations<T> {
     private final Consumer<MapperBuilder<ObjectMapper, ?>> configureReaderBuilder;
     private final Consumer<ObjectMapper> configureReaderMapper;
@@ -27,6 +32,22 @@ public class ModifyableConfigurations<T> extends Configurations<T> {
     private final Consumer<ObjectMapper> configureMapper;
     private final List<JacksonModule> modules;
 
+    /**
+     * Creates the configurations.
+     *
+     * @param base                   the directory relative key paths are resolved against
+     * @param main                   the key of the main configuration file
+     * @param formats                the data formats available to the keys
+     * @param classLoader            the class loader used to resolve configuration types
+     * @param parent                 the configurations to fall back to, or {@code null}
+     * @param configureReaderBuilder applied to the builder of every reader mapper
+     * @param configureReaderMapper  applied to every built reader mapper
+     * @param configureWriterBuilder applied to the builder of every writer mapper
+     * @param configureWriterMapper  applied to every built writer mapper
+     * @param configureBuilder       applied to the builder of every mapper
+     * @param configureMapper        applied to every built mapper
+     * @param modules                the modules registered on every mapper
+     */
     public ModifyableConfigurations(
             Path base,
             @NotNull Key<T> main,
