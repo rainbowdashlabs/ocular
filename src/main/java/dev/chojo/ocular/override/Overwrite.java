@@ -26,6 +26,9 @@ import java.lang.annotation.Target;
  * }</pre>
  * This will first check the system property, then the environment variable. If both are set,
  * the system property wins because it is declared first.
+ * <p>
+ * By default, an applied override becomes part of the configuration and is written to the file when it
+ * is saved. Set {@link #persist()} to {@code false} to keep the value from the file instead.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
@@ -44,4 +47,12 @@ public @interface Overwrite {
      * Description of the override.
      */
     String description() default "";
+
+    /**
+     * Whether an applied override is written to the file when the configuration is saved.
+     * <p>
+     * When {@code false}, saving writes the value that was read from the file, as long as the member still holds
+     * the override value. A value assigned by code after loading is written as usual.
+     */
+    boolean persist() default true;
 }

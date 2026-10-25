@@ -7,6 +7,7 @@ package dev.chojo.ocular.override;
 
 import org.slf4j.Logger;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -49,12 +50,18 @@ public final class OverrideApplier {
      * The same is done for single-parameter methods (e.g. setters), where the override value is
      * converted to the method's parameter type and the method is invoked.
      *
+     * <p>
+     * Every applied override is returned as an {@link AppliedOverride}, so the value read from the file can be
+     * written instead of the override and a later change to the field can be reported.
+     *
      * @param object   the configuration object whose fields/methods may be overridden
      * @param supplier the source of override values (typically a generated class)
      * @param <V>      the configuration type
+     * @return the applied overrides
      */
-    public static <V> void applyOverrides(V object, ValueSupplier supplier) {
-        if (object == null || supplier == null) return;
+    public static <V> List<AppliedOverride> applyOverrides(V object, ValueSupplier supplier) {
+        List<AppliedOverride> applied = new ArrayList<>();
+        if (object == null || supplier == null) return applied;
 
         // Get the class definition so we can inspect its fields and methods via reflection.
         // Reflection lets us read and write private fields at runtime, which is how we inject
@@ -77,8 +84,10 @@ public final class OverrideApplier {
                     // might be an int, boolean, etc. convertValue handles that conversion.
                     Object value = convertValue(field.getType(), field.getGenericType(), override.get());
                     if (value != null) {
+                        Object fileValue = field.get(object);
                         // Actually write the override value into the field on the config object
                         field.set(object, value);
+                        record(applied, field, object, field, fileValue);
                     }
                 } catch (IllegalAccessException e) {
                     log.warn("Could not set override for field {}: {}", field.getName(), e.getMessage());
@@ -101,8 +110,11 @@ public final class OverrideApplier {
                     Object value = convertValue(
                             method.getParameterTypes()[0], method.getGenericParameterTypes()[0], override.get());
                     if (value != null) {
+                        Field backingField = setterBackingField(clazz, method);
+                        Object fileValue = backingField == null ? null : backingField.get(object);
                         // Call the method on the config object, passing the override value
                         method.invoke(object, value);
+                        if (backingField != null) record(applied, method, object, backingField, fileValue);
                     }
                 } catch (IllegalAccessException e) {
                     log.warn("Could not invoke override for method {}: {}", method.getName(), e.getMessage());
@@ -133,7 +145,9 @@ public final class OverrideApplier {
                         Object value =
                                 convertValue(targetField.getType(), targetField.getGenericType(), override.get());
                         if (value != null) {
+                            Object fileValue = targetField.get(object);
                             targetField.set(object, value);
+                            record(applied, method, object, targetField, fileValue);
                         }
                     } catch (IllegalAccessException e) {
                         log.warn("Could not set override for getter {}: {}", method.getName(), e.getMessage());
@@ -146,17 +160,55 @@ public final class OverrideApplier {
                 }
             }
         }
+        return applied;
+    }
+
+    /**
+     * Returns whether the override of the given member is written to the file. Members without an
+     * {@link Overwrite} annotation are treated as persisted.
+     */
+    private static boolean isPersisted(AnnotatedElement member) {
+        Overwrite overwrite = member.getAnnotation(Overwrite.class);
+        return overwrite == null || overwrite.persist();
+    }
+
+    /**
+     * Records an applied override.
+     *
+     * @param member    the annotated field or method the override was applied through
+     * @param field     the field that holds the value
+     * @param fileValue the value of the field before the override was applied
+     */
+    private static void record(List<AppliedOverride> applied, AnnotatedElement member, Object object, Field field,
+                               Object fileValue) throws IllegalAccessException {
+        applied.add(new AppliedOverride(object, field, fileValue, field.get(object), isPersisted(member)));
+    }
+
+    /**
+     * Finds the field a setter writes to. Returns {@code null} when no backing field is found, in which case the
+     * override is not tracked: it is written to the file and changes to it are not reported.
+     */
+    private static Field setterBackingField(Class<?> clazz, Method setter) {
+        Field field = findBackingField(clazz, setter.getName(), setter.getParameterTypes()[0]);
+        if (field == null) {
+            if (!isPersisted(setter)) {
+                log.warn("Could not find backing field for setter method {}, its override will be saved", setter.getName());
+            }
+            return null;
+        }
+        field.setAccessible(true);
+        return field;
     }
 
     /**
      * Finds the backing field for a getter method by trying several strategies:
      * <ol>
      *   <li>Exact name match (method name equals field name)</li>
-     *   <li>JavaBean getter convention: strip "get"/"is" prefix and lowercase first char</li>
+     *   <li>JavaBean convention: strip "get"/"is"/"set" prefix and lowercase first char</li>
      *   <li>Prefix match: find a field whose name the method name starts with,
      *       preferring the longest matching field name (e.g. "greetingValue" matches "greeting")</li>
      * </ol>
-     * Only fields whose type is compatible with the method's return type are considered.
+     * Only fields whose type matches the given type (the getter's return type or the setter's parameter type) are considered.
      */
     private static Field findBackingField(Class<?> clazz, String methodName, Class<?> returnType) {
         // Strategy 1: exact name match
@@ -166,9 +218,9 @@ public final class OverrideApplier {
             }
         }
 
-        // Strategy 2: JavaBean getter convention (getHost -> host, isDebug -> debug)
+        // Strategy 2: JavaBean convention (getHost -> host, isDebug -> debug, setHost -> host)
         String beanFieldName = null;
-        if (methodName.startsWith("get") && methodName.length() > 3) {
+        if ((methodName.startsWith("get") || methodName.startsWith("set")) && methodName.length() > 3) {
             beanFieldName = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
         } else if (methodName.startsWith("is") && methodName.length() > 2) {
             beanFieldName = Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
