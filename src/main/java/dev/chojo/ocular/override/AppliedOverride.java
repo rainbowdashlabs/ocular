@@ -43,9 +43,11 @@ public final class AppliedOverride {
     public void warnIfChanged() {
         if (changeReported || !isChanged()) return;
         changeReported = true;
-        log.warn("{}.{} was changed, but it is set by an environment variable or system property. The new value is "
-                 + "saved to the file, but the override takes precedence whenever the configuration is loaded.",
-                target.getClass().getSimpleName(), field.getName());
+        log.warn(
+                "{}.{} was changed, but it is set by an environment variable or system property. The new value is "
+                        + "saved to the file, but the override takes precedence whenever the configuration is loaded.",
+                target.getClass().getSimpleName(),
+                field.getName());
     }
 
     /**

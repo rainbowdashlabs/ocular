@@ -28,7 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class HeldOverrideTest {
 
     private static final Path BASE = Path.of("held_override_test_config");
-    private static final Key<HeldConfig> CONFIG_KEY = Key.builder(Path.of("config.json"), HeldConfig::new).build();
+    private static final Key<HeldConfig> CONFIG_KEY =
+            Key.builder(Path.of("config.json"), HeldConfig::new).build();
 
     private Configurations<HeldConfig> conf;
 
@@ -41,7 +42,9 @@ class HeldOverrideTest {
         System.setProperty("held.token", "secret");
         System.setProperty("held.name", "from-prop");
         System.setProperty("held.port", "9999");
-        conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat()).setBase(BASE).build();
+        conf = Configurations.builder(CONFIG_KEY, new JsonDataFormat())
+                .setBase(BASE)
+                .build();
     }
 
     @AfterEach

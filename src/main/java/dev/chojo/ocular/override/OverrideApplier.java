@@ -179,8 +179,9 @@ public final class OverrideApplier {
      * @param field     the field that holds the value
      * @param fileValue the value of the field before the override was applied
      */
-    private static void record(List<AppliedOverride> applied, AnnotatedElement member, Object object, Field field,
-                               Object fileValue) throws IllegalAccessException {
+    private static void record(
+            List<AppliedOverride> applied, AnnotatedElement member, Object object, Field field, Object fileValue)
+            throws IllegalAccessException {
         applied.add(new AppliedOverride(object, field, fileValue, field.get(object), isPersisted(member)));
     }
 
@@ -192,7 +193,9 @@ public final class OverrideApplier {
         Field field = findBackingField(clazz, setter.getName(), setter.getParameterTypes()[0]);
         if (field == null) {
             if (!isPersisted(setter)) {
-                log.warn("Could not find backing field for setter method {}, its override will be saved", setter.getName());
+                log.warn(
+                        "Could not find backing field for setter method {}, its override will be saved",
+                        setter.getName());
             }
             return null;
         }

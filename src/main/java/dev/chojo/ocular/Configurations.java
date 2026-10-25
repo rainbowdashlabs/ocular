@@ -38,8 +38,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -396,7 +396,8 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     private String serializeWithFileValues(FileWrapper<?> wrapper) {
         List<AppliedOverride> applied = appliedOverrides.getOrDefault(wrapper.file(), List.of());
         applied.forEach(AppliedOverride::warnIfChanged);
-        List<AppliedOverride> restored = applied.stream().filter(AppliedOverride::restoreFileValue).toList();
+        List<AppliedOverride> restored =
+                applied.stream().filter(AppliedOverride::restoreFileValue).toList();
         try {
             return wrapper.asString();
         } finally {
@@ -437,11 +438,13 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      */
     private <V> void applyOverrides(V object, Key<V> key) {
         List<AppliedOverride> applied = new ArrayList<>();
-        applyOverridesRecursive(object, key.configClazz(), key, Collections.newSetFromMap(new IdentityHashMap<>()), applied);
+        applyOverridesRecursive(
+                object, key.configClazz(), key, Collections.newSetFromMap(new IdentityHashMap<>()), applied);
         if (!applied.isEmpty()) appliedOverrides.put(object, applied);
     }
 
-    private void applyOverridesRecursive(Object object, Class<?> clazz, Key<?> key, Set<Object> visited, List<AppliedOverride> applied) {
+    private void applyOverridesRecursive(
+            Object object, Class<?> clazz, Key<?> key, Set<Object> visited, List<AppliedOverride> applied) {
         if (object == null || !visited.add(object)) return;
 
         String baseName = clazz.getName();
