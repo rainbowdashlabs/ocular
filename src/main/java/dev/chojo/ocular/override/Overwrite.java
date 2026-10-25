@@ -35,16 +35,22 @@ import java.lang.annotation.Target;
 public @interface Overwrite {
     /**
      * Environment variable sources to check for an override value.
+     *
+     * @return the environment variable sources
      */
     Env[] env() default {};
 
     /**
      * System property sources to check for an override value.
+     *
+     * @return the system property sources
      */
     Prop[] prop() default {};
 
     /**
      * Description of the override.
+     *
+     * @return the description, shown in the log and in the generated reference
      */
     String description() default "";
 
@@ -53,6 +59,8 @@ public @interface Overwrite {
      * <p>
      * When {@code false}, saving writes the value that was read from the file, as long as the member still holds
      * the override value. A value assigned by code after loading is written as usual.
+     *
+     * @return {@code false} to write the file value instead of the override
      */
     boolean persist() default true;
 }

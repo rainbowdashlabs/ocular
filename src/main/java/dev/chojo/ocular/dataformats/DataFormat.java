@@ -43,6 +43,8 @@ public interface DataFormat<M extends ObjectMapper, B extends MapperBuilder<M, B
 
     /**
      * Used to determine whether the default pretty printer should be used explicitly
+     *
+     * @return {@code true} to write with the default pretty printer
      */
     default boolean enablePrettyPrint() {
         return false;

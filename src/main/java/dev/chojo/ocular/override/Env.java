@@ -31,6 +31,8 @@ import java.lang.annotation.Target;
 public @interface Env {
     /**
      * The environment variable name to read. Leave empty to use the auto-derived name.
+     *
+     * @return the environment variable name, or an empty string for the derived one
      */
     String value() default "";
 }

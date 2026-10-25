@@ -48,6 +48,8 @@ import java.lang.annotation.Target;
 public @interface OverwritePrefix {
     /**
      * The custom prefix to use instead of the class name.
+     *
+     * @return the prefix
      */
     String value();
 
@@ -58,6 +60,8 @@ public @interface OverwritePrefix {
      * For env vars, the result is {@code PREFIX_NAME}. For props, it is {@code prefix.name}.
      * <p>
      * Defaults to {@code false}.
+     *
+     * @return {@code true} to prepend the prefix to explicit names as well
      */
     boolean force() default false;
 }

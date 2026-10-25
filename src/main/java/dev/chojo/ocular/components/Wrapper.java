@@ -23,6 +23,12 @@ public class Wrapper<T> implements Closeable {
     private final Key<T> key;
     private final Configurations<?> config;
 
+    /**
+     * Creates a wrapper for the file of the given key.
+     *
+     * @param key    the key of the configuration file
+     * @param config the configurations that hold the file
+     */
     public Wrapper(Key<T> key, Configurations<?> config) {
         this.key = key;
         this.config = config;

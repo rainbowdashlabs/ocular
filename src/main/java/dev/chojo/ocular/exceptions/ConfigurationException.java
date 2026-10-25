@@ -13,6 +13,12 @@ package dev.chojo.ocular.exceptions;
  * providing an explanatory message and the underlying cause for the failure.
  */
 public class ConfigurationException extends RuntimeException {
+    /**
+     * Creates the exception.
+     *
+     * @param message the description of the failed operation
+     * @param cause   the underlying cause
+     */
     public ConfigurationException(String message, Throwable cause) {
         super(message, cause);
     }

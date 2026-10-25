@@ -41,6 +41,7 @@ public class KeyBuilder<T> {
      * Sets the name for the key being built.
      *
      * @param name the name to be assigned to the key
+     * @return self
      */
     public KeyBuilder<T> name(String name) {
         this.name = name;
@@ -50,6 +51,8 @@ public class KeyBuilder<T> {
     /**
      * Makes loading fail when the file cannot be read, leaving the file untouched, instead of backing it up and
      * replacing it with the initial value.
+     *
+     * @return self
      */
     public KeyBuilder<T> strict() {
         this.strict = true;
@@ -64,12 +67,18 @@ public class KeyBuilder<T> {
      * package.
      *
      * @param rootPackage the package name, for example {@code com.example.config}
+     * @return self
      */
     public KeyBuilder<T> rootPackage(String rootPackage) {
         this.rootPackage = rootPackage;
         return this;
     }
 
+    /**
+     * Builds the key.
+     *
+     * @return the key
+     */
     public Key<T> build() {
         return new Key<>(name, path, configClazz, initValue, strict, rootPackage);
     }

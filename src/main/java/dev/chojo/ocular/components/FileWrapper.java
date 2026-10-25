@@ -13,7 +13,9 @@ import tools.jackson.core.JacksonException;
  * to serialize the encapsulated file object into a string representation using
  * the configured writer of the associated format.
  *
- * @param <T> the type of the file object being wrapped
+ * @param format the format used to serialize the file object
+ * @param file   the file object
+ * @param <T>    the type of the file object being wrapped
  */
 public record FileWrapper<T>(Format<?, ?> format, T file) {
     /**
