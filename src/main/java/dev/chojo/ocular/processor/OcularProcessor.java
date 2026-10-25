@@ -329,8 +329,7 @@ public class OcularProcessor extends AbstractProcessor {
                 overwriteMirror.getElementValues().entrySet()) {
             // attrName is either "prop" or "env" — the attribute name from @Overwrite
             String attrName = entry.getKey().getSimpleName().toString();
-            // Skip the description value
-            if (entry.getValue().getValue().getClass() == String.class) continue;
+            if (!"prop".equals(attrName) && !"env".equals(attrName)) continue;
             // The value is an array of nested annotations (e.g. the @Prop[] or @Env[] array)
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> values =

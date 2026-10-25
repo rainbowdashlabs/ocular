@@ -105,7 +105,7 @@ With this class:
 
 :::warning
 An overridden value is a normal value of your object. When you save the file, the overridden value is written into
-it.
+it. Use [`persist = false`](#keep-an-override-out-of-the-file) to keep it out.
 :::
 
 ### Order of sources
@@ -145,6 +145,25 @@ public class AppConfig {
 This field reads the environment variable `APPCONFIG_HOST` and the system property `appconfig.host`.
 
 The class name is the simple name of the class that declares the field.
+
+### Keep an override out of the file
+
+Set `persist = false` and saving writes the value that was read from the file instead of the override. This suits
+secrets passed in through the environment:
+
+```java
+@Overwrite(env = @Env("APP_TOKEN"), persist = false)
+private String token = "";
+```
+
+Your object still holds the override value. If your code assigns a different value after loading, that value is
+written as usual.
+
+### Changing an overridden field
+
+Changing an overridden field has no lasting effect. The new value can end up in the file, but the environment
+variable or system property wins again the next time the file is loaded. Ocular logs a warning the first time such a
+changed field is saved.
 
 ## Prefix
 

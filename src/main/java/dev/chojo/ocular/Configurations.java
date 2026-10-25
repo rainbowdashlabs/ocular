@@ -17,6 +17,7 @@ import dev.chojo.ocular.hooks.ConfigSubscriber;
 import dev.chojo.ocular.key.Key;
 import dev.chojo.ocular.locks.KeyLock;
 import dev.chojo.ocular.locks.KeyLocks;
+import dev.chojo.ocular.override.AppliedOverride;
 import dev.chojo.ocular.override.OverrideApplier;
 import dev.chojo.ocular.override.ValueSupplier;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,6 +69,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
     private final ClassLoader classLoader;
     private final Map<Key<?>, FileWrapper<?>> files = new HashMap<>();
     private final KeyLocks locks = new KeyLocks();
+    private final Map<Object, List<AppliedOverride>> appliedOverrides = new IdentityHashMap<>();
 
     public Configurations(
             Path base,
@@ -204,6 +207,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @param <V>      type of key
      */
     public <V> void replace(Key<V> key, V newValue) {
+        forgetAppliedOverrides(key);
         files.put(key, new FileWrapper<>(determineFormat(key), newValue));
     }
 
@@ -256,7 +260,13 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * @param key configuration key
      */
     public void reload(Key<?> key) {
+        forgetAppliedOverrides(key);
         files.put(key, createAndLoad(key));
+    }
+
+    private void forgetAppliedOverrides(Key<?> key) {
+        FileWrapper<?> current = files.get(key);
+        if (current != null) appliedOverrides.remove(current.file());
     }
 
     @Override
@@ -362,17 +372,36 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
         }
     }
 
+    /**
+     * Writes the configuration to the given path.
+     * <p>
+     * Overrides declared with {@link dev.chojo.ocular.override.Overwrite#persist() persist = false} are swapped
+     * back to the values read from the file while the configuration is serialized, and reapplied afterwards.
+     * A warning is logged for every overridden field that code has changed, since the override replaces the change
+     * on the next load.
+     */
     private void write(Path path, FileWrapper<?> wrapper) {
         try {
             if (wrapper.file() instanceof ConfigSubscriber sub) {
                 sub.preWrite(this);
             }
             Files.createDirectories(path.getParent());
-            // We do this to avoid wiping a file on serialization error.
-            Files.writeString(path, wrapper.asString());
+            Files.writeString(path, serializeWithFileValues(wrapper));
         } catch (IOException e) {
             log.error("Could not write configuration file to {}", path, e);
             throw new ConfigurationException("Could not write configuration file to " + path, e);
+        }
+    }
+
+    private String serializeWithFileValues(FileWrapper<?> wrapper) {
+        List<AppliedOverride> applied = appliedOverrides.getOrDefault(wrapper.file(), List.of());
+        applied.forEach(AppliedOverride::warnIfChanged);
+        List<AppliedOverride> restored =
+                applied.stream().filter(AppliedOverride::restoreFileValue).toList();
+        try {
+            return wrapper.asString();
+        } finally {
+            restored.forEach(AppliedOverride::reapplyOverride);
         }
     }
 
@@ -403,12 +432,19 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
      * <p>
      * Nested objects are searched as well, as long as their class lies in the {@link Key#rootPackage() root package}
      * of the key. Static fields are skipped.
+     * <p>
+     * Applied overrides are remembered for the loaded object, so {@link #write(Path, FileWrapper)} can write the file
+     * values in place of overrides that must not be persisted and warn about changed overridden fields.
      */
     private <V> void applyOverrides(V object, Key<V> key) {
-        applyOverridesRecursive(object, key.configClazz(), key, Collections.newSetFromMap(new IdentityHashMap<>()));
+        List<AppliedOverride> applied = new ArrayList<>();
+        applyOverridesRecursive(
+                object, key.configClazz(), key, Collections.newSetFromMap(new IdentityHashMap<>()), applied);
+        if (!applied.isEmpty()) appliedOverrides.put(object, applied);
     }
 
-    private void applyOverridesRecursive(Object object, Class<?> clazz, Key<?> key, Set<Object> visited) {
+    private void applyOverridesRecursive(
+            Object object, Class<?> clazz, Key<?> key, Set<Object> visited, List<AppliedOverride> applied) {
         if (object == null || !visited.add(object)) return;
 
         String baseName = clazz.getName();
@@ -422,7 +458,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                 ValueSupplier supplier =
                         (ValueSupplier) overrideClass.getDeclaredConstructor().newInstance();
                 // Apply the collected override values to the config object's fields/methods
-                OverrideApplier.applyOverrides(object, supplier);
+                applied.addAll(OverrideApplier.applyOverrides(object, supplier));
                 break;
             } catch (ClassNotFoundException ignored) {
                 // No generated class for this naming variant — try the next one
@@ -438,7 +474,7 @@ public class Configurations<T> implements Configurator<ObjectMapper, MapperBuild
                 field.setAccessible(true);
                 Object nested = field.get(object);
                 if (nested != null && key.isInRootPackage(nested.getClass())) {
-                    applyOverridesRecursive(nested, nested.getClass(), key, visited);
+                    applyOverridesRecursive(nested, nested.getClass(), key, visited, applied);
                 }
             } catch (IllegalAccessException | InaccessibleObjectException e) {
                 log.warn(
