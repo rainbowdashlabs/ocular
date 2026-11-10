@@ -1,5 +1,5 @@
 [versions]
-spotless = "8.10.4"
+spotless = "8.11.0"
 palantir = "2.102.0"
 vanniktech = "0.37.0"
 publishdata = "2.3.0"
